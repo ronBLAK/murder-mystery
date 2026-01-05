@@ -95,8 +95,16 @@ class CluesFramework:
     
     # this function returns if there are any clues like fingerprints or blood on the knife
     def get_murder_weapon_clues_framework(clue_list):
+        # this is the lookup corrolating the murder weapon clue to its scene clue - ex: ClueStates.fingerprint is the scene fimgerprint clue state of MurderWeaponClueState.fingerprint
+        corrolative_clues_lookup = {
+            MurderWeaponClueStates.FINGERPRINTS: ClueStates.FINGERPRINTS,
+            MurderWeaponClueStates.HAIR: ClueStates.HAIR,
+            MurderWeaponClueStates.BLOOD: ClueStates.BLOOD
+        }
+        
         murder_weapon_clue_list_copy = CluesFramework.murder_weapon_clue_list.copy()
         murder_weapon_clues_that_exist = []
+        to_remove = [] # list to collect the items to remove
         
         # this loop returns all the clues that can exist on the murder weapon based on the existence of the parent clue in the clue list
         for clue in clue_list:
@@ -106,12 +114,18 @@ class CluesFramework:
                     murder_weapon_clue_list_copy.remove(murder_weapon_clue)
             
         murder_weapon_clue_number = random.randint(1, len(murder_weapon_clues_that_exist))
-            
+        
+        # this loop goes through the number of murder weapon clues that is randomly generated, and picks that many number of murder weapon clues from the new selection list generated based on what parent clues exist in the list   
         for _ in range(murder_weapon_clue_number):
             random_murder_weapon_clue_index = random.randint(0, len(murder_weapon_clues_that_exist) - 1)
             clue_list.append(murder_weapon_clues_that_exist[random_murder_weapon_clue_index])
             murder_weapon_clues_that_exist.pop(random_murder_weapon_clue_index)
-              
+            
+        # this loop goes through all the murder weapon clue states in the clue states and removes their parents from the list
+        for clue_state in clue_list:
+            if clue_state in corrolative_clues_lookup and clue_state != MurderWeaponClueStates.BLOOD:
+                clue_list.remove(corrolative_clues_lookup[clue_state])
+                
         return clue_list
     
     # will change this to a completely separate class - will have three major classes for clues or will call this function from the class that gets the actual information from the suspects file (both these lead to the same point - the clue design data and the clue file - the clue system with the information from the suspect file are generated from the same point and from the same function)
@@ -154,12 +168,7 @@ class Clues:
             NoteStates.NOTES_NAME_JUMBLED: NoteStates.NOTES_NAME_JUMBLED
         }
         
-        # this is the lookup corrolating the murder weapon clue to its scene clue - ex: ClueStates.fingerprint is the scene fimgerprint clue state of MurderWeaponClueState.fingerprint
-        corrolative_clues_lookup = {
-            MurderWeaponClueStates.FINGERPRINTS: ClueStates.FINGERPRINTS,
-            MurderWeaponClueStates.HAIR: ClueStates.HAIR,
-            MurderWeaponClueStates.BLOOD: ClueStates.BLOOD
-        }
+        # remove the ClueState version of a clue if the MurderWeaponClueState version of the same clue also exists - if there is a murder weapon clue for a clue, then the murder wepaon state will be the only one in the scene with that clue type.
         
         # these three variables hold an instance of the lists of clue types that can be selected, for easy use in this class
         biological_clues_framework_selection_list = CluesFramework.clues_dict[ClueTypesStates.BIOLOGICAL_EVIDENCE] # this is the different biological clue frameworks that the system can select the biological clues from
@@ -190,10 +199,14 @@ class Clues:
                 
                 index = selected_clue_framework.index(careless_mistake_framework) # gets the index of the clue in question from selected clues frameworks
                 refactored_clue_index_in_main_frameworks_list.append(index)
-                
+        
+        # this loop works with the selected murder weapon clues framework, comparing them against the original holder list, and adding only the selected ones into a new temporary list, local to this function       
         for murder_weapon_clue_framework in selected_clue_framework:
             if murder_weapon_clue_framework in murder_weapon_framework_selection_list:
                 selected_murder_weapon_clues_framework.append(murder_weapon_clue_framework)
+                
+                index = selected_clue_framework.index(murder_weapon_clue_framework) # gets the index of the murder weapon from the selected clues framework
+                refactored_clue_index_in_main_frameworks_list.append(index)
         
         # this loop works with the selected other clues frameworks comparing them them against the original holder lists, and adding only the selected ones in a new temporary list local to this function        
         for other_clue_framework in selected_clue_framework:
@@ -208,12 +221,13 @@ class Clues:
                 index = selected_clue_framework.index(other_clue_framework) # gets the index of the clue in question from selected clues frameworks
                 refactored_clue_index_in_main_frameworks_list.append(index)
                 
-        return selected_biological_clues_framework, selected_careless_mistakes_framework, selected_other_clues_framework, refactored_clue_index_in_main_frameworks_list
+        return selected_biological_clues_framework, selected_careless_mistakes_framework, selected_other_clues_framework, selected_murder_weapon_clues_framework, refactored_clue_index_in_main_frameworks_list
     
-    def generate_final_clues_from_framework(selected_biological_clues_framework, selected_careless_mistakes_framework, selected_other_clues_framework, selected_clues_final_framework):
+    def generate_final_clues_from_framework(selected_biological_clues_framework, selected_careless_mistakes_framework, selected_other_clues_framework, selected_murder_weapon_clues_framework, selected_clues_final_framework):
         # these lists are the ones that will be populated with the actual values on the case related data from save files, based on all the frameworks generated and retrieved
         final_biological_clues = []
         final_careless_mistakes = []
+        final_murder_weapon_clues = []
         final_other_clues = []
         
         # this opens the culprit data - to gather info to present at clues that include the culprit data - don't worry - the culprit data is already injected into the suspect data, contaminating it, so this clue will not show the detective who the killer is in just one go
@@ -224,7 +238,7 @@ class Clues:
         with open(SAVE_DIRECTORY / 'case data.json', 'r') as json_file:
             case_data = json.load(json_file)
             
-        # these three loops loops through each of the refactored lists, and retrieves data of those keys from the respective save file
+        # these four loops loops through each of the refactored lists, and retrieves data of those keys from the respective save file
         for biological_clue_framework in selected_biological_clues_framework:
             biological_clue_data = culprit_data[biological_clue_framework.value]
             final_biological_clues.append(biological_clue_data)
@@ -236,12 +250,16 @@ class Clues:
                 careless_mistake_data = culprit_data[careless_mistake_framework.value]
             
             final_careless_mistakes.append(careless_mistake_data) # this appends the careless mistake in question to the final careless mistakes data list, whether ot not it is a murder weapon
+           
+        for murder_weapon_clue_framework in selected_murder_weapon_clues_framework:
+            murder_weapon_clue_data = culprit_data[murder_weapon_clue_framework.value]
+            final_murder_weapon_clues.append(murder_weapon_clue_data)
             
-        return final_biological_clues, final_careless_mistakes
+        return final_biological_clues, final_careless_mistakes, final_murder_weapon_clues
 
 # -- testing sector --    
-selected_bio_framework, selected_careless_framework, selected_other_framework, clue_index_in_main_list = Clues.refactor_final_framework(Clues.clues_framework)    
-final_bio_clues, final_careless_mistakes = Clues.generate_final_clues_from_framework(selected_bio_framework, selected_careless_framework, selected_other_framework, Clues.clues_framework)
+selected_bio_framework, selected_careless_framework, selected_other_framework, selected_murder_weapon_framework, clue_index_in_main_list = Clues.refactor_final_framework(Clues.clues_framework)    
+final_bio_clues, final_careless_mistakes, selected_murder_weapon_clues = Clues.generate_final_clues_from_framework(selected_bio_framework, selected_careless_framework, selected_other_framework, selected_murder_weapon_framework, Clues.clues_framework)
 
 print(Clues.clues_framework)
 print('')
@@ -249,10 +267,13 @@ print('-- this is the frameworks lists --')
 print(f'selected biological clues frameworks: {selected_bio_framework}')
 print(f'selected careless mistakes frameworks: {selected_careless_framework}')
 print(f'selected other clues frameworks: {selected_other_framework}') 
+print(f'selected murder weapon frameworks: {selected_murder_weapon_framework}')
 
 print('')
 print(f'fina biological clues: {final_bio_clues}')
 print(f'final careless mistakes: {final_careless_mistakes}')
+print(f'final other clues: ')
+print(f'final murder weapon clues: {selected_murder_weapon_clues}')
 
 print('')
 print(clue_index_in_main_list)
