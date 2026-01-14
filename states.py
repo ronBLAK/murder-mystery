@@ -29,3 +29,5 @@ class NoteStates(Enum):
     NOTES_NAME = 'notes name'
     NOTES_NAME_FLIPPED = 'notes name flipped'
     NOTES_NAME_JUMBLED = 'notes name jumbled'
+    NOTES_NAME_OFFSET = 'notes name offset'
+    NOTES_NAME_ALGEBRA = 'notes name algebra'

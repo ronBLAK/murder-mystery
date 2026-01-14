@@ -16,7 +16,7 @@ class Case:
     murder_type_dict = {
         "knife": ['stab', 'slit'],
         "gun": ['shot'],
-        "baseball bat": ['blunt force trauma'],
+        "baseball bat": ['smack'],
         "water": ['drown']
     }
 
@@ -132,7 +132,6 @@ class Case:
     }
 
     # generates a random case with random components passed into the case function. this is stored in a json file for comparison with the detective's criminal
-    @staticmethod
     def generate_case(culprit_name, murder_weapon, murder_location, murder_type, weather, time_of_day, is_witness_present, witness_num, victim_name, has_injury, injury_location, suspects, culprit_index_in_suspects_list, time_of_murder_clock_notation, time_notation, hour, minute, save = True):
         # holds all the values that need to be save to the newly created, locked json file
         case_components = {
@@ -166,8 +165,7 @@ class Case:
         return case_components
     
     # generates a case file from the same content of the case method. this is the story version that the detective sees
-    @staticmethod
-    def generate_case_file(victim_name, murder_weapon, has_injury, injury_location, murder_location, murder_type, weather, time_of_day, witness_num, num_suspects, suspects, time_of_day_clock_format, save = True):
+    def generate_case_file(victim_name, has_injury, injury_location, murder_location, murder_type, weather, time_of_day, witness_num, num_suspects, suspects, time_of_day_clock_format, save = True):
         if has_injury == True:
             case_file = f'{victim_name} was found dead in a {murder_location}. The cause of death\nwas a {murder_type} wound on the {injury_location}. It was\na {weather} {time_of_day} at {time_of_day_clock_format} when the murder happened,\naccording to forensics, and there are {witness_num} witnesses to this\ncrime. There are {len(num_suspects)} suspects to this crime. They are\n{suspects}'
         else:
@@ -272,7 +270,7 @@ class Case:
 
     # returns a list of 4 suspects including 3 random suspects and the returned culprit himself
     def get_suspects(culprit, culprit_name_list):
-        selected_suspects = [None] * 4 # creates an empty list of length 4 to be populated with the suspects of the case
+        selected_suspects = [None] * 4 # creates an empty list of length 4 to be populated with the suspects of the case - 4 because it does not include the culprit
         culprit_index_in_suspects_list = random.randint(0, 3) # generates a random number from within the length of the selected suspects to place the culprit in (the culprit name position is randomized so that the culprit name does not always show up at the same spot)
         suspects = culprit_name_list.copy() # creates a copy of the culprits name list to act as the suspect pool for the case
         
@@ -330,5 +328,5 @@ class Case:
         # components that need formatting from the raw data format to user-readable format
         formatted_suspects_list = ', '.join(pulled_suspects_list)
 
-        Case.generate_case_file(pulled_victim_name, pulled_murder_weapon, pulled_has_injury, pulled_injury_location, pulled_murder_location, pulled_murder_type, pulled_weather, pulled_time_of_day, pulled_witness_number, pulled_suspects_list, formatted_suspects_list, pulled_time_of_day_clock_notation)
+        Case.generate_case_file(pulled_victim_name, pulled_has_injury, pulled_injury_location, pulled_murder_location, pulled_murder_type, pulled_weather, pulled_time_of_day, pulled_witness_number, pulled_suspects_list, formatted_suspects_list, pulled_time_of_day_clock_notation)
         return pulled_culprit_name

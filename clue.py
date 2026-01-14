@@ -1,6 +1,7 @@
 import random
 import json
 import copy
+import string
 from save import Save
 from states import ClueTypesStates, ClueStates, MurderWeaponClueStates, NoteStates
 from paths import SAVE_DIRECTORY
@@ -33,7 +34,9 @@ class CluesFramework:
         ClueStates.NOTES: [
             NoteStates.NOTES_NAME,
             NoteStates.NOTES_NAME_FLIPPED,
-            NoteStates.NOTES_NAME_JUMBLED
+            NoteStates.NOTES_NAME_JUMBLED,
+            NoteStates.NOTES_NAME_OFFSET,
+            NoteStates.NOTES_NAME_ALGEBRA
         ]
     }
     
@@ -54,7 +57,7 @@ class CluesFramework:
         clue_types_list_copy = clue_types_list.copy()
         selected_clue_types = []
         
-        for i in range(clue_types_number):
+        for _ in range(clue_types_number):
             random_clue_type = random.choice(clue_types_list_copy)
             selected_clue_types.append(random_clue_type)
             clue_types_list_copy.remove(random_clue_type)
@@ -104,7 +107,6 @@ class CluesFramework:
         
         murder_weapon_clue_list_copy = CluesFramework.murder_weapon_clue_list.copy()
         murder_weapon_clues_that_exist = []
-        to_remove = [] # list to collect the items to remove
         
         # this loop returns all the clues that can exist on the murder weapon based on the existence of the parent clue in the clue list
         for clue in clue_list:
@@ -122,9 +124,9 @@ class CluesFramework:
             murder_weapon_clues_that_exist.pop(random_murder_weapon_clue_index)
             
         # this loop goes through all the murder weapon clue states in the clue states and removes their parents from the list
-        for clue_state in clue_list:
-            if clue_state in corrolative_clues_lookup and clue_state != MurderWeaponClueStates.BLOOD:
-                clue_list.remove(corrolative_clues_lookup[clue_state])
+        for murder_weapon_clue_framework in corrolative_clues_lookup:
+            if murder_weapon_clue_framework in clue_list and corrolative_clues_lookup[murder_weapon_clue_framework] in clue_list:
+                clue_list.remove(corrolative_clues_lookup[murder_weapon_clue_framework]) # remove the ClueState version of a clue if the MurderWeaponClueState version of the same clue also exists - if there is a murder weapon clue for a clue, then the murder wepaon state will be the only one in the scene with that clue type.
                 
         return clue_list
     
@@ -145,35 +147,88 @@ class CluesFramework:
             
         return clue_num, selected_clues, selected_murder_weapon_clues
 
+# this class holds clues that cannot be just selected from json file, but require custom functions
+class CustomClues:
+    # this aligns each alphabet of the name passed into it, with the number that corresponds with the alphabets
+    def get_name_code(name):
+        name_chars = list(name) # breaks the name into its characters appended to a list
+        
+        # char-num lookup list - to assign numbers to each of the characters of the name
+        alphabets_uppercase = list(string.ascii_uppercase) # uppercase alphabets
+        alphabets_lowercase = list(string.ascii_lowercase) # lowercase alphabets
+        numbers_till_26 = list(range(1, 27)) # holds numbers from one to 26
+        
+        formatted_string_numbers = [] # holds the decimal version of the numbers from the string list of numbers - THIS IS THE MAIN LIST THAT IS GOING TO BE USED FOR EACH CHARACTER IN THE NAME
+        name_code_list = [] # this list holds the numbers corresponding to the name passed in
+        name_code_as_string = []
+        
+        # converts the ints in the integer list to strings, zero pads them to three digits, and adds decimal point between the 1st and second digit, and casts this into a float
+        for num in numbers_till_26:
+            num = str(num).zfill(3) # converts each int into strings and zero pads each string of numbers - padded to 3 digits because single digit decimal operations produce unpredictable values
+            formatted_num = float(num[0] + '.' + num[1] + num[2]) # formats the zero padded int into decimals, and casts it to float
+            formatted_string_numbers.append(formatted_num)
+            
+        # this loop actually looks at the name passed in, and the numbers derived, and picks the numbers based on the characters of the name
+        for char in name_chars:
+            # this if/elif block checks if the character char is uppercase or lowercase - this does not matter for the index, but if we have just one loop and check for only uppercase or only lowercase, it will throw an error if the pointer char is one of the other ones.
+            if char in alphabets_uppercase:
+                name_char_index_in_alphabet = alphabets_uppercase.index(char)
+            elif char in alphabets_lowercase:
+                name_char_index_in_alphabet = alphabets_lowercase.index(char)
+            
+            name_code_list.append(formatted_string_numbers[name_char_index_in_alphabet]) # appends the formatted number associated with the characters of the name to this list
+            
+        for num in name_code_list:
+            name_code_as_string.append(str(num))
+            
+        name_code_as_string = '/'.join(name_code_as_string)
+            
+        return name_code_list, name_code_as_string
+    
+    # this function takes in the encrypted name and flips it
+    def flip_name_code(name_code_list):
+        name_code_flipped_list = name_code_list[::-1] # flips the encrypted name char list and adds the characters in the new order into a new list
+        name_code_flipped_as_string = [] # creates a new list to store the flipped encryption as a complete string
+        
+        for num in name_code_flipped_list:
+            name_code_flipped_as_string.append(str(num))
+            
+        name_code_flipped_as_string = '/'.join(name_code_flipped_as_string)
+        
+        return name_code_flipped_as_string
+    
+    # this function takes the encrypted name and jumbles it
+    def jumble_name_code(name_code_list):
+        name_code_char_index = [] # creates an empty list to store the indices of each character within the code list
+        jumbled_name_code_list = [None] * len(name_code_list) # creates an empty list to store the jumbled characters of the encrypted name
+        jumbled_name_code_as_string = [] # creates a new list to store the jumbled version of the code as an entire string
+        
+        # populates the random index list with each of the indices from within the name code list for each of the characters
+        name_code_char_index = list(range(len(name_code_list)))
+        
+        # adds each character of the code into its new random index    
+        for num in name_code_list:
+            new_random_index = random.choice(name_code_char_index)
+            jumbled_name_code_list[new_random_index] = num
+            name_code_char_index.remove(new_random_index)
+            
+        for num in jumbled_name_code_list:
+            jumbled_name_code_as_string.append(str(num))
+            
+        jumbled_name_code_as_string = '/'.join(jumbled_name_code_as_string)
+        
+        return jumbled_name_code_as_string
+    
 class Clues:
     clue_num, clues_framework, murder_weapon_clues_framework = CluesFramework.generate_all_clues_framework() # this is where the function defined for the frameworks in the frameworks class is called to actually generate the clues, based on the framework generated
     
-    # need to change this so that visibilty affects the actual final clue list, and not the clue types.
-    # this flags whether the detetcive can see a certain clue or not - this was changed from the clue frameworks class because it is required here and not there - plus, when it was created there, accessing it from this class is impossible without extensive, unnecessary means
-    def get_clue_type_visiblity_status(clues_num):
-        visibility_status = []
-        
-        for _ in range(clues_num):
-            visibility_status.append(random.choice([True, False]))
-        
-        return visibility_status
-    
-    clues_visiblisity_status = get_clue_type_visiblity_status(clue_num) # this might not be the final location of this function call - will need to change its place accordingly
-    
+    # this is function refactors the single clue frameworks list by categories into separate lists so that when the time comes for logic, different clue types can go through different rules for getting information from save files, as some are structured differently to rest
     def refactor_final_framework(selected_clue_framework):
-        # this is the lookup for clues that have subvariants
-        multiple_instance_clue_lookup = {
-            NoteStates.NOTES_NAME: NoteStates.NOTES_NAME,
-            NoteStates.NOTES_NAME_FLIPPED: NoteStates.NOTES_NAME_FLIPPED,
-            NoteStates.NOTES_NAME_JUMBLED: NoteStates.NOTES_NAME_JUMBLED
-        }
-        
-        # remove the ClueState version of a clue if the MurderWeaponClueState version of the same clue also exists - if there is a murder weapon clue for a clue, then the murder wepaon state will be the only one in the scene with that clue type.
-        
-        # these three variables hold an instance of the lists of clue types that can be selected, for easy use in this class
+        # these four variables hold an instance of the lists of clue types that can be selected, for easy use in this class
         biological_clues_framework_selection_list = CluesFramework.clues_dict[ClueTypesStates.BIOLOGICAL_EVIDENCE] # this is the different biological clue frameworks that the system can select the biological clues from
         careless_mistakes_framework_selection_list = CluesFramework.clues_dict[ClueTypesStates.CARELESS_MISTAKES] # this is the different careless mistakes frameworks that the system can select the careless mistakes from
         other_clues_framework_selection_list = CluesFramework.clues_dict[ClueTypesStates.OTHER] # this is the different other clues frameworks that the system can select the other clues from
+        other_clues_framework_selection_dict = CluesFramework.other_clues_dict # this assigns the other clues dictionary to this variable in its entirety, so that keys can be passed into it in this function
         murder_weapon_framework_selection_list = CluesFramework.murder_weapon_clue_list # this is the different murder weapon clues frameworks that the system can select the murder weapon clue from, based on the existence of its parent clue
         
         # these three lists hold the different kinds of selected clues frameworks of different types - this is a temporary list that only this function will use, for a more precise validation of the different kinds of clues frameworks selected
@@ -215,8 +270,8 @@ class Clues:
             
                 index = selected_clue_framework.index(other_clue_framework) # gets the index of the clue in question from selected clues frameworks
                 refactored_clue_index_in_main_frameworks_list.append(index)
-            elif other_clue_framework in multiple_instance_clue_lookup:
-                selected_other_clues_framework.append(multiple_instance_clue_lookup[other_clue_framework]) # adds the other clue from look up dictioary in question to other refactored clue list
+            elif other_clue_framework in other_clues_framework_selection_dict[ClueStates.NOTES]:
+                selected_other_clues_framework.append(other_clue_framework) # adds the other clue from look up dictioary in question to other refactored clue list
                 
                 index = selected_clue_framework.index(other_clue_framework) # gets the index of the clue in question from selected clues frameworks
                 refactored_clue_index_in_main_frameworks_list.append(index)
@@ -256,6 +311,18 @@ class Clues:
             final_murder_weapon_clues.append(murder_weapon_clue_data)
             
         return final_biological_clues, final_careless_mistakes, final_murder_weapon_clues
+    
+    # need to change this so that visibilty affects the actual final clue list, and not the clue types.
+    # this flags whether the detetcive can see a certain clue or not - this was changed from the clue frameworks class because it is required here and not there - plus, when it was created there, accessing it from this class is impossible without extensive, unnecessary means
+    def get_clue_type_visiblity_status(clues_num):
+        visibility_status = []
+        
+        for _ in range(clues_num):
+            visibility_status.append(random.choice([True, False]))
+        
+        return visibility_status
+    
+    clues_visiblisity_status = get_clue_type_visiblity_status(clue_num) # this might not be the final location of this function call - will need to change its place accordingly
 
 # -- testing sector --    
 selected_bio_framework, selected_careless_framework, selected_other_framework, selected_murder_weapon_framework, clue_index_in_main_list = Clues.refactor_final_framework(Clues.clues_framework)    

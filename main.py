@@ -1,5 +1,6 @@
 import time
 import os
+from paths import SAVE_DIRECTORY
 from user_interaction import UserInteraction
 from case import Case
 #from clue import Clues
@@ -16,15 +17,15 @@ fame = DetectiveAttributes.fame
 cases_solved = DetectiveAttributes.cases_solved
 
 # stores the names of different save files into variables
-case_data_file_path = 'case data.json'
-case_file_file_path = 'case file.json'
-detective_data_file_path = 'detective data.json'
-suspects_info_file_path = 'suspects info.json'
-suspect_report_file_path = 'suspects file.json'
-witness_data_file_path = 'witness data.json'
-witness_report_file_path = 'witness file.json'
-culprit_data_file_path = 'culprit data.json'
-victim_data_file_path = 'victim data.json'
+case_data_file_path = SAVE_DIRECTORY / 'case data.json'
+case_file_file_path = SAVE_DIRECTORY / 'case file.json'
+detective_data_file_path = SAVE_DIRECTORY / 'detective data.json'
+suspects_info_file_path = SAVE_DIRECTORY / 'suspects info.json'
+suspect_report_file_path = SAVE_DIRECTORY / 'suspects file.json'
+witness_data_file_path = SAVE_DIRECTORY / 'witness data.json'
+witness_report_file_path = SAVE_DIRECTORY / 'witness file.json'
+culprit_data_file_path = SAVE_DIRECTORY / 'culprit data.json'
+victim_data_file_path = SAVE_DIRECTORY / 'victim data.json'
 
 suspect_generated = False
 
