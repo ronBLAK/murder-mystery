@@ -219,6 +219,55 @@ class CustomClues:
         
         return jumbled_name_code_as_string
     
+    # this function takes the encvrypted name and offsets each character with a random value - this value is given to the detective, but not exactly in a way that they would immediatly know what to do with this extra value
+    def offset_name_code(name_code_list):
+        offset_value = round(random.uniform(2, 90), 2) # sets the offset value to a floating point number rounded off to 2 floating points
+        offset_name_code_list = [] # creates an empty list to store the offset name code
+        offset_name_code_as_string = [] # this holds the numbers as strings, and then used to join as one full list
+        offset_name_code_with_offset = [] # this holds the entire string version of numbers separated by the / in one index and the offset value in the next index
+        operations_list = ['+', '-', '*'] # this list holds a combination of all the possible operations possible
+        
+        # this function adds the a and b
+        def add(a, b):
+            return a + b
+        
+        # this function subtracts b from a
+        def subtract(a, b):
+            return a - b
+        
+        # this function multiplies a and b
+        def multiply(a, b):
+            return a * b
+        
+        # this is the list that stores all the possible operations for the offset - stores the actual functions for dispatch
+        operations_dict = {
+            '+': add,
+            '-': subtract,
+            '*': multiply
+        }
+        
+        random_operation_key = random.choice(operations_list) # this selects a random key from the operations list
+        
+        for num in name_code_list:
+            # does the selected operation with the number that is being iterated over and the offest number
+            offsetted_num = operations_dict[random_operation_key](num, offset_value)
+            offsetted_num = round(offsetted_num, 2)
+            offset_name_code_list.append(offsetted_num)
+        
+        # this adds each of the offset numbers as strings into the list meant to be joined with the /    
+        for num in offset_name_code_list:
+            offset_name_code_as_string.append(str(num))
+            
+        offset_name_code_as_string = '/'.join(offset_name_code_as_string) # this joins the offset numbers with a /
+        
+        # these two lines appends the entire string and the offset value for the player to solve for the actual name
+        offset_name_code_with_offset.append(offset_name_code_as_string)
+        offset_name_code_with_offset.append(offset_value)
+        
+        offset_name_code_with_offset = '//'.join(offset_name_code_with_offset) # this joins the code and the offset value with a different kind of separation
+        
+        return offset_name_code_with_offset
+    
 class Clues:
     clue_num, clues_framework, murder_weapon_clues_framework = CluesFramework.generate_all_clues_framework() # this is where the function defined for the frameworks in the frameworks class is called to actually generate the clues, based on the framework generated
     
