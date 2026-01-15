@@ -268,11 +268,34 @@ class CustomClues:
         
         # these two lines appends the entire string and the offset value for the player to solve for the actual name
         offset_name_code_with_offset.append(offset_name_code_as_string)
-        offset_name_code_with_offset.append(offset_value)
+        offset_name_code_with_offset.append(str(offset_value))
         
         offset_name_code_with_offset = '//'.join(offset_name_code_with_offset) # this joins the code and the offset value with a different kind of separation
         
         return offset_name_code_with_offset
+    
+    # this function removes one of the encrypted characters, and in place, gives the sum of all the encrypted characters, so that the user can figure out the missing character - presented in the same format as the offset note, to confuse the player between the two
+    def algebraic_character_mapping(name_code_list):
+        sum_name_code_list = round(sum(name_code_list), 2) # returns the sum of all the numbers in encryption form
+        random_index_to_remove = random.randint(0, len(name_code_list) - 1) # this returns a random index to remove from the character list, that can be obtained through simple algebra
+
+        algebraic_name_code_as_string = [] # this stores the previous list, entirely as a string, still with no sum
+        algebraic_name_code_with_sum = [] # this stores the previous list, with the sum attached to it
+        
+        name_code_list.pop(random_index_to_remove) # removes the random index to remove from the passed in list
+        
+        for num in name_code_list:
+            algebraic_name_code_as_string.append(str(num)) # this appends all items from the updated name code list, as string - index for removal removed
+            
+        algebraic_name_code_as_string = '/'.join(algebraic_name_code_as_string) # joins the list with /
+        
+        # appends the string version of the code list, and the sum into another list
+        algebraic_name_code_with_sum.append(algebraic_name_code_as_string)
+        algebraic_name_code_with_sum.append(str(sum_name_code_list))
+        
+        algebraic_name_code_with_sum = '//'.join(algebraic_name_code_with_sum) # joins the sum and the rest of the code with a //
+        
+        return algebraic_name_code_with_sum
     
 class Clues:
     clue_num, clues_framework, murder_weapon_clues_framework = CluesFramework.generate_all_clues_framework() # this is where the function defined for the frameworks in the frameworks class is called to actually generate the clues, based on the framework generated
