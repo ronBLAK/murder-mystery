@@ -251,7 +251,13 @@ class CustomClues:
         for num in name_code_list:
             # does the selected operation with the number that is being iterated over and the offest number
             offsetted_num = operations_dict[random_operation_key](num, offset_value)
-            offsetted_num = round(offsetted_num, 2)
+            
+            # rounds it to 4 floating points, if it is multiplication, and to 2 floating points if it of the other operations
+            if random_operation_key == '*':
+                offsetted_num = round(offsetted_num, 4)
+            else:
+                offsetted_num = round(offsetted_num, 2)
+            
             offset_name_code_list.append(offsetted_num)
         
         # this adds each of the offset numbers as strings into the list meant to be joined with the /    
