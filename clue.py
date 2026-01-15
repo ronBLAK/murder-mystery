@@ -258,7 +258,7 @@ class CustomClues:
             else:
                 offsetted_num = round(offsetted_num, 2)
             
-            offset_name_code_list.append(offsetted_num)
+            offset_name_code_list.append(offsetted_num) # this appends the offsetted number to the non-string version list of the offset code.
         
         # this adds each of the offset numbers as strings into the list meant to be joined with the /    
         for num in offset_name_code_list:
