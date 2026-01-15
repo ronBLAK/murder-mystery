@@ -313,7 +313,6 @@ class Case:
 
         # pulls saved data from case data.json
         pulled_culprit_name = case_data.get('case details').get('culprit name')
-        pulled_murder_weapon = case_data.get('murder details').get('murder weapon')
         pulled_murder_location = case_data.get('murder details').get('murder location')
         pulled_murder_type = case_data.get('murder details').get('murder type')
         pulled_weather = case_data.get('murder details').get('weather')
