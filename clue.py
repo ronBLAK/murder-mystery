@@ -388,7 +388,25 @@ class Clues:
             murder_weapon_clue_data = culprit_data[murder_weapon_clue_framework.value]
             final_murder_weapon_clues.append(murder_weapon_clue_data)
             
-        return final_biological_clues, final_careless_mistakes, final_murder_weapon_clues
+        # this is the dictionary that maps the different notes functions to the different other clue frameworks
+        other_clues_mapping_dict = {
+            NoteStates.NOTES_NAME: CustomClues.get_name_code,
+            NoteStates.NOTES_NAME_FLIPPED: CustomClues.flip_name_code,
+            NoteStates.NOTES_NAME_JUMBLED: CustomClues.jumble_name_code,
+            NoteStates.NOTES_NAME_OFFSET: CustomClues.offset_name_code,
+            NoteStates.NOTES_NAME_ALGEBRA: CustomClues.algebraic_character_mapping
+        }
+            
+        for other_clue_framework in selected_other_clues_framework:
+            if other_clue_framework in CluesFramework.other_clues_dict[ClueStates.NOTES]:
+                encrypted_name, encrypted_name_as_string = other_clues_mapping_dict[NoteStates.NOTES_NAME](culprit_data['name'])
+                
+                if other_clue_framework == NoteStates.NOTES_NAME:
+                    final_other_clues.append(encrypted_name_as_string)
+                else:
+                    final_other_clues.append(other_clues_mapping_dict[other_clue_framework](encrypted_name))
+            
+        return final_biological_clues, final_careless_mistakes, final_murder_weapon_clues, final_other_clues
     
     # need to change this so that visibilty affects the actual final clue list, and not the clue types.
     # this flags whether the detetcive can see a certain clue or not - this was changed from the clue frameworks class because it is required here and not there - plus, when it was created there, accessing it from this class is impossible without extensive, unnecessary means
@@ -404,7 +422,7 @@ class Clues:
 
 # -- testing sector --    
 selected_bio_framework, selected_careless_framework, selected_other_framework, selected_murder_weapon_framework, clue_index_in_main_list = Clues.refactor_final_framework(Clues.clues_framework)    
-final_bio_clues, final_careless_mistakes, selected_murder_weapon_clues = Clues.generate_final_clues_from_framework(selected_bio_framework, selected_careless_framework, selected_other_framework, selected_murder_weapon_framework, Clues.clues_framework)
+final_bio_clues, final_careless_mistakes, final_murder_weapon_clues, final_other_clues = Clues.generate_final_clues_from_framework(selected_bio_framework, selected_careless_framework, selected_other_framework, selected_murder_weapon_framework, Clues.clues_framework)
 
 print(Clues.clues_framework)
 print('')
@@ -417,8 +435,8 @@ print(f'selected murder weapon frameworks: {selected_murder_weapon_framework}')
 print('')
 print(f'fina biological clues: {final_bio_clues}')
 print(f'final careless mistakes: {final_careless_mistakes}')
-print(f'final other clues: ')
-print(f'final murder weapon clues: {selected_murder_weapon_clues}')
+print(f'final murder weapon clues: {final_murder_weapon_clues}')
+print(f'final other clues: {final_other_clues}')
 
 print('')
 print(clue_index_in_main_list)
