@@ -1,6 +1,5 @@
 import time
 from case import Case
-from culprit import Culprit
 from suspects import Suspects
 from witnesses import Witnesses
 from detective import Detective

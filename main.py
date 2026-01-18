@@ -3,7 +3,7 @@ import os
 from paths import SAVE_DIRECTORY
 from user_interaction import UserInteraction
 from case import Case
-#from clue import Clues
+from clue import Clues
 from suspects import Suspects, SuspectIllusion
 from culprit import Culprit
 from witnesses import Witnesses
@@ -25,9 +25,7 @@ suspect_report_file_path = SAVE_DIRECTORY / 'suspects file.json'
 witness_data_file_path = SAVE_DIRECTORY / 'witness data.json'
 witness_report_file_path = SAVE_DIRECTORY / 'witness file.json'
 culprit_data_file_path = SAVE_DIRECTORY / 'culprit data.json'
-victim_data_file_path = SAVE_DIRECTORY / 'victim data.json'
-
-suspect_generated = False
+victim_data_file_path = 'victim data.json'
 
 print("you have been transferred to the detective wing of the police department.")
 print("")
@@ -80,6 +78,8 @@ if os.path.exists(case_file_file_path) and os.path.exists(case_data_file_path) a
         Culprit.set_culprit_details_final() # takes information from each of the attribute list in the suspects save file, regarding only the culprit, and saves it to another file
         SuspectIllusion.generate_suspect_attributes_after_illuded() # Generates a new set of values for the suspect attributes but procedurally injecting culprit data into the suspect attribute data list, and updating the suspects info save file accordingly
         Victim.generate_victim_data_random() # Generates random information for the victim - names are generated with the case, and not from within the victim class
+        Clues.generate_clues_random() # Generates the different clues clues are generated procedurally, using states, and not just whatever is in the case data, culprit data and suspect data
+        
 
         # Checks and validates the input
         while UserInteraction.question_start_solve() != '1':
@@ -90,6 +90,7 @@ if os.path.exists(case_file_file_path) and os.path.exists(case_data_file_path) a
             Culprit.set_culprit_details_final()
             SuspectIllusion.generate_suspect_attributes_after_illuded()
             Victim.generate_victim_data_random()
+            Clues.generate_clues_random()
 
         # This is what happens if the user selects the given case instead of generating a new case
         print('Case selected')
@@ -128,6 +129,7 @@ else:
     Culprit.set_culprit_details_final() # takes information from each of the attribute list in the suspects save file, regarding only the culprit, and saves it to another file
     SuspectIllusion.generate_suspect_attributes_after_illuded() # Generates a new set of values for the suspect attributes but procedurally injecting culprit data into the suspect attribute data list, and updating the suspects info save file accordingly
     Victim.generate_victim_data_random() # Generates random information for the victim - names are generated with the case, and not from within the victim class
+    Clues.generate_clues_random() # Generates the different clues clues are generated procedurally, using states, and not just whatever is in the case data, culprit data and suspect data
 
     # Checks and validates the input
     while UserInteraction.question_start_solve() != '1':
@@ -138,6 +140,7 @@ else:
         Culprit.set_culprit_details_final()
         SuspectIllusion.generate_suspect_attributes_after_illuded()
         Victim.generate_victim_data_random()
+        Clues.generate_clues_random()
 
     # This is what happens if the user selects the given case instead of generating a new case
     print('Case selected')

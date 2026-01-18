@@ -73,9 +73,3 @@ class Save:
         
         with open(file_path, 'w') as json_file:
             json.dump(clue_data, json_file, indent= 4)
-            
-    def save_clue_file(clue_file):
-        file_path = SAVE_DIRECTORY / 'clue file.json'
-        
-        with open(file_path, 'w') as json_file:
-            json.dump(clue_file, json_file, indent= 4)

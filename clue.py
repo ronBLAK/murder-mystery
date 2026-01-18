@@ -138,12 +138,13 @@ class CluesFramework:
         selected_careless_mistakes_num = random.randint(1, 3)
         selected_other_clues_num = 1
         selected_clues = CluesFramework.get_clues_framework(selected_biological_evidence_num, selected_careless_mistakes_num, selected_other_clues_num, CluesFramework.other_clues_dict,selected_clue_types, CluesFramework.clues_dict)
-        clue_num = len(selected_clues)
         
         if ClueStates.MURDER_WEAPON in selected_clues:
             selected_murder_weapon_clues = CluesFramework.get_murder_weapon_clues_framework(selected_clues)
         else:
             selected_murder_weapon_clues = None
+            
+        clue_num = len(selected_clues)
             
         return clue_num, selected_clues, selected_murder_weapon_clues
 
@@ -298,7 +299,37 @@ class CustomClues:
         return algebraic_name_code_with_sum
     
 class Clues:
-    clue_num, clues_framework, murder_weapon_clues_framework = CluesFramework.generate_all_clues_framework() # this is where the function defined for the frameworks in the frameworks class is called to actually generate the clues, based on the framework generated
+    def save_clue_data(clues_framework_list, final_clues_list, clue_visibility_status_list, save = True):
+        # this makes sure that th enums are converted to the strings attached to them, so that is it is savable in json - json cannot save enums, which is what a state system is
+        serialized_framework_list = [
+            clue.value if hasattr (clue, 'value') else clue
+            for clue in clues_framework_list
+        ]
+        
+        # holds the two main components of the clues - the framework, and the actual clues
+        clue_data = {
+            'clues framework': serialized_framework_list,
+            'final clues': final_clues_list,
+            'clues visibility status': clue_visibility_status_list
+        }
+        
+        if save:
+            Save.save_clue_data(clue_data)
+            
+        return clue_data
+    
+    # need to change this so that visibilty affects the actual final clue list, and not the clue types.
+    # this flags whether the detetcive can see a certain clue or not - this was changed from the clue frameworks class because it is required here and not there - plus, when it was created there, accessing it from this class is impossible without extensive, unnecessary means
+    def get_clue_type_visiblity_status(clues_num):
+        visibility_status = []
+        
+        for _ in range(clues_num):
+            if clues_num == 1:
+                visibility_status.append(True)
+            else:
+                visibility_status.append(random.choice([True, False]))
+        
+        return visibility_status
     
     # this is function refactors the single clue frameworks list by categories into separate lists so that when the time comes for logic, different clue types can go through different rules for getting information from save files, as some are structured differently to rest
     def refactor_final_framework(selected_clue_framework):
@@ -371,7 +402,7 @@ class Clues:
         with open(SAVE_DIRECTORY / 'case data.json', 'r') as json_file:
             case_data = json.load(json_file)
             
-        # these four loops loops through each of the refactored lists, and retrieves data of those keys from the respective save file
+        # these three loops loop through each of the refactored lists, excluding the other clues list, and retrieves data of those keys from the respective save file
         for biological_clue_framework in selected_biological_clues_framework:
             biological_clue_data = culprit_data[biological_clue_framework.value]
             final_biological_clues.append(biological_clue_data)
@@ -396,11 +427,16 @@ class Clues:
             NoteStates.NOTES_NAME_OFFSET: CustomClues.offset_name_code,
             NoteStates.NOTES_NAME_ALGEBRA: CustomClues.algebraic_character_mapping
         }
-            
+        
+        # this loop loops through the selected other clues frameworks list, and uses the appropriate functions from custom clues to generate the right type of encryption levels of the name of the culprit and adds that into the final other clues list    
         for other_clue_framework in selected_other_clues_framework:
+            # checks if the other clue framework in question is under the notes header in the other clues dict
             if other_clue_framework in CluesFramework.other_clues_dict[ClueStates.NOTES]:
+                # this generates the initial name encoding - given that the other clue in question is a note
                 encrypted_name, encrypted_name_as_string = other_clues_mapping_dict[NoteStates.NOTES_NAME](culprit_data['name'])
                 
+                # depending on the note that is present, the correct function to use is mapped with the other clues mapping dict
+                # appends the encrypted name into final other clues
                 if other_clue_framework == NoteStates.NOTES_NAME:
                     final_other_clues.append(encrypted_name_as_string)
                 else:
@@ -408,35 +444,20 @@ class Clues:
             
         return final_biological_clues, final_careless_mistakes, final_murder_weapon_clues, final_other_clues
     
-    # need to change this so that visibilty affects the actual final clue list, and not the clue types.
-    # this flags whether the detetcive can see a certain clue or not - this was changed from the clue frameworks class because it is required here and not there - plus, when it was created there, accessing it from this class is impossible without extensive, unnecessary means
-    def get_clue_type_visiblity_status(clues_num):
-        visibility_status = []
+    def generate_clues_random():
+        clue_num, clues_framework, _ = CluesFramework.generate_all_clues_framework() # this is where the function defined for the frameworks in the frameworks class is called to actually generate the clues, based on the framework generated
         
-        for _ in range(clues_num):
-            visibility_status.append(random.choice([True, False]))
+        clues_visiblisity_status = Clues.get_clue_type_visiblity_status(clue_num) # this might not be the final location of this function call - will need to change its place accordingly
         
-        return visibility_status
-    
-    clues_visiblisity_status = get_clue_type_visiblity_status(clue_num) # this might not be the final location of this function call - will need to change its place accordingly
-
-# -- testing sector --    
-selected_bio_framework, selected_careless_framework, selected_other_framework, selected_murder_weapon_framework, clue_index_in_main_list = Clues.refactor_final_framework(Clues.clues_framework)    
-final_bio_clues, final_careless_mistakes, final_murder_weapon_clues, final_other_clues = Clues.generate_final_clues_from_framework(selected_bio_framework, selected_careless_framework, selected_other_framework, selected_murder_weapon_framework, Clues.clues_framework)
-
-print(Clues.clues_framework)
-print('')
-print('-- this is the frameworks lists --')
-print(f'selected biological clues frameworks: {selected_bio_framework}')
-print(f'selected careless mistakes frameworks: {selected_careless_framework}')
-print(f'selected other clues frameworks: {selected_other_framework}') 
-print(f'selected murder weapon frameworks: {selected_murder_weapon_framework}')
-
-print('')
-print(f'fina biological clues: {final_bio_clues}')
-print(f'final careless mistakes: {final_careless_mistakes}')
-print(f'final murder weapon clues: {final_murder_weapon_clues}')
-print(f'final other clues: {final_other_clues}')
-
-print('')
-print(clue_index_in_main_list)
+        selected_bio_framework, selected_careless_framework, selected_other_framework, selected_murder_weapon_framework, clue_index_in_main_list = Clues.refactor_final_framework(clues_framework)    
+        final_biological_clues, final_careless_mistakes, final_murder_weapon_clues, final_other_clues = Clues.generate_final_clues_from_framework(selected_bio_framework, selected_careless_framework, selected_other_framework, selected_murder_weapon_framework, clues_framework)
+        
+        final_clues_list = [None] * clue_num  # holds all the final clues together - takes all the items from the broken up lists, and adds them, into the same index as the framework in the frameworks list
+        
+        final_clues_list_temporary = final_biological_clues + final_careless_mistakes + final_murder_weapon_clues + final_other_clues # this list stores all the final clues together - order not synced to the frameworks list
+        
+        # what this does is that indexes the index list from 0 to the end of the list - in order - the items remain in the same order, but is indexed in order. each of this index is paired up with items from temporary final clue list, and for each of the index in the indexes list, the index at that index is the index at which the clue is appened to - works like a nested for loop, but not looping for i*1
+        for i, item in enumerate(final_clues_list_temporary):
+            final_clues_list[clue_index_in_main_list[i]] = item
+            
+        Clues.save_clue_data(clues_framework, final_clues_list, clues_visiblisity_status)
