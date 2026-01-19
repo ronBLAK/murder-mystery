@@ -14,22 +14,43 @@ class CluesFramework:
         ClueTypesStates.CARELESS_MISTAKES
     ]
     
-    clues_dict = {
-        # need to make it so that the options for blood and hair are available only if there is a wound by the knife or the gun - otherwise, only hair can be found for now
-        ClueTypesStates.BIOLOGICAL_EVIDENCE: [
-            ClueStates.HAIR,
-            ClueStates.BLOOD
-        ],
-        ClueTypesStates.CARELESS_MISTAKES: [
-            ClueStates.MURDER_WEAPON,
-            ClueStates.FINGERPRINTS,
-            ClueStates.FOOTPRINTS
-        ],
-        ClueTypesStates.OTHER: [
-            ClueStates.NOTES # add new elif/else statement in other clue selection process, if i find other plausible clues/clue types that i can add to this other clue list
-        ]
-    }
+    with open(SAVE_DIRECTORY / 'case data.json', 'r') as json_file:
+        case_data = json.load(json_file)
+        
+    murder_weapon = case_data['murder details']['murder weapon']
     
+    if murder_weapon == 'water':
+            clues_dict = {
+            # need to make it so that the options for blood and hair are available only if there is a wound by the knife or the gun - otherwise, only hair can be found for now
+            ClueTypesStates.BIOLOGICAL_EVIDENCE: [
+                ClueStates.HAIR,
+                ClueStates.BLOOD
+            ],
+            ClueTypesStates.CARELESS_MISTAKES: [
+                ClueStates.FINGERPRINTS,
+                ClueStates.FOOTPRINTS
+            ],
+            ClueTypesStates.OTHER: [
+                ClueStates.NOTES # add new elif/else statement in other clue selection process, if i find other plausible clues/clue types that i can add to this other clue list
+            ]
+        }
+    else:
+            clues_dict = {
+            # need to make it so that the options for blood and hair are available only if there is a wound by the knife or the gun - otherwise, only hair can be found for now
+            ClueTypesStates.BIOLOGICAL_EVIDENCE: [
+                ClueStates.HAIR,
+                ClueStates.BLOOD
+            ],
+            ClueTypesStates.CARELESS_MISTAKES: [
+                ClueStates.MURDER_WEAPON,
+                ClueStates.FINGERPRINTS,
+                ClueStates.FOOTPRINTS
+            ],
+            ClueTypesStates.OTHER: [
+                ClueStates.NOTES # add new elif/else statement in other clue selection process, if i find other plausible clues/clue types that i can add to this other clue list
+            ]
+        }
+
     other_clues_dict = {
         ClueStates.NOTES: [
             NoteStates.NOTES_NAME,
@@ -69,6 +90,9 @@ class CluesFramework:
     
     # this function determines the kind of clues anywhere on thec crime scene, apart from the murder weapon - clues on the murder weapon is determined by another function.
     def get_clues_framework(biological_evidence_number, careless_mistake_number, other_clues_number, other_clues_dict, clue_types_list, clues_dict):
+        # imports the clue framework class each time new clue frameworks are generated - to refresh the state of the list based on hardcoded implementation of whether weapon is really a weapon or just added as weapon to normalise the list to avoid complication
+        from clue import CluesFramework
+        
         clues_dict_copy = copy.deepcopy(clues_dict)
         clues = [] # this is the list that appends all the below clue lists into one grandfather list
                 
@@ -134,9 +158,12 @@ class CluesFramework:
     def generate_all_clues_framework():
         selected_clue_types_number = CluesFramework.get_clue_type_number(CluesFramework.clue_types)
         selected_clue_types = CluesFramework.get_clue_types(selected_clue_types_number, CluesFramework.clue_types)
-        selected_biological_evidence_num = random.randint(1, 2)
-        selected_careless_mistakes_num = random.randint(1, 3)
-        selected_other_clues_num = 1
+        
+        # sets how many of types of each clue can be selected - based on how many there are to select
+        selected_biological_evidence_num = random.randint(1, len(CluesFramework.clues_dict[ClueTypesStates.BIOLOGICAL_EVIDENCE]))
+        selected_careless_mistakes_num = random.randint(1, len(CluesFramework.clues_dict[ClueTypesStates.CARELESS_MISTAKES]))
+        selected_other_clues_num = random.randint(1, len(CluesFramework.clues_dict[ClueTypesStates.OTHER]))
+        
         selected_clues = CluesFramework.get_clues_framework(selected_biological_evidence_num, selected_careless_mistakes_num, selected_other_clues_num, CluesFramework.other_clues_dict,selected_clue_types, CluesFramework.clues_dict)
         
         if ClueStates.MURDER_WEAPON in selected_clues:
@@ -461,3 +488,5 @@ class Clues:
             final_clues_list[clue_index_in_main_list[i]] = item
             
         Clues.save_clue_data(clues_framework, final_clues_list, clues_visiblisity_status)
+        
+print(CluesFramework.clues_dict[ClueTypesStates.CARELESS_MISTAKES])
