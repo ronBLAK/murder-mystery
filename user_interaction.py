@@ -62,7 +62,7 @@ class CluesUI:
         }
         
         if user_choice == '0': # exit clues ui loop
-            MainUI.user_menu_interaction('1')
+            pass # the the loop is broken in the actual loop function - nothing is supposed to happen here in this function
         elif int(user_choice) in clues_command_mapping_dict:
             if clues_command_mapping_dict[int(user_choice)] in selected_clues_framework:
                 shared_index = selected_clues_framework.index(clues_command_mapping_dict[int(user_choice)]) # no matter if its a murder weapon clue or crime scene clue, the index in the list final framework list remains the same - it is the text that changes - hence the index allocation is kept common for both cases
@@ -77,22 +77,19 @@ class CluesUI:
                     print(f'The {selected_clues_framework[shared_index]} found at the crime scene was {selected_clues[shared_index]}')
                     print('')
                     time.sleep(2)
-                
-                CluesUI.commands() # prints the commands no matter the case
             elif int(user_choice) == 6:
                 from clue import CluesFramework # imports clue framework to access the other clues dict to check with all the different note types that exist vs ones that exost in the case
                 
                 # this entire for loop is checking only for any note types that is selected as a clue
                 for note_state in CluesFramework.other_clues_dict[ClueStates.NOTES]:
                     if note_state.value in selected_clues_framework:
-                        shared_index = selected_clues_framework.index(note_state.value)
+                        shared_index = selected_clues_framework.index(note_state.value) # this is the index of the framework and data clue from the saved lists - the lists are linked by index, hence why they have the same index named shared index
                         
                         print(f'The note that was found at the crime scene had the following content:')
                         print('')
                         print(f'    {selected_clues[shared_index]}      ')
                         print('')
                         time.sleep(2)
-                        CluesUI.commands
                 else:
                     print('')
                     print('-- that clue is not available for this case. you can only look for clues that exist for this case --')
@@ -111,6 +108,7 @@ class CluesUI:
         while True:
             print('')
             CluesUI.commands()
+            print('')
             user_menu_choice = input('Enter clue command here --> ')
             print('')
             if user_menu_choice == '0':

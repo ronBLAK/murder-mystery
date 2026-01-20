@@ -56,7 +56,7 @@ if os.path.exists(case_file_file_path) and os.path.exists(case_data_file_path) a
             print('')
             user_menu_choice = input('Enter main UI command here --> ')
             print('')
-            if user_menu_choice == '1':
+            if user_menu_choice == '0':
                 MainUI.user_menu_interaction(user_menu_choice)
                 break
             else:
