@@ -1,7 +1,7 @@
 import time
 import os
 from paths import SAVE_DIRECTORY
-from user_interaction import UserInteraction
+from user_interaction import MainUI
 from case import Case
 from clue import Clues
 from suspects import Suspects, SuspectIllusion
@@ -25,11 +25,12 @@ suspect_report_file_path = SAVE_DIRECTORY / 'suspects file.json'
 witness_data_file_path = SAVE_DIRECTORY / 'witness data.json'
 witness_report_file_path = SAVE_DIRECTORY / 'witness file.json'
 culprit_data_file_path = SAVE_DIRECTORY / 'culprit data.json'
-victim_data_file_path = 'victim data.json'
+victim_data_file_path = SAVE_DIRECTORY / 'victim data.json'
 
 print("you have been transferred to the detective wing of the police department.")
 print("")
 print("--- enter any name other than the name of the previous detective's name to start a new account ---")
+print('--- ONCE A NEW ACCOUNT HAS STARTED, THERE IS NO GOING BACK ---')
 
 # asks the user for their detective name
 detective_name = Detective.detective_name()
@@ -48,18 +49,18 @@ if os.path.exists(case_file_file_path) and os.path.exists(case_data_file_path) a
 
         print('The case is all yours, detective...')
         time.sleep(2)
-        UserInteraction.commands()
+        MainUI.commands()
         print('')
 
         while True:
             print('')
-            user_menu_choice = input('Enter your choice here --> ')
+            user_menu_choice = input('Enter main UI command here --> ')
             print('')
             if user_menu_choice == '1':
-                UserInteraction.user_menu_interaction(user_menu_choice)
+                MainUI.user_menu_interaction(user_menu_choice)
                 break
             else:
-                UserInteraction.user_menu_interaction(user_menu_choice)
+                MainUI.user_menu_interaction(user_menu_choice)
                 print('')
     else:
         fame = 0
@@ -82,7 +83,7 @@ if os.path.exists(case_file_file_path) and os.path.exists(case_data_file_path) a
         
 
         # Checks and validates the input
-        while UserInteraction.question_start_solve() != '1':
+        while MainUI.question_start_solve() != '1':
             print('New Case:')
             Case.generate_case_and_case_file_random()
             Suspects.generate_suspects_report_random()
@@ -100,18 +101,18 @@ if os.path.exists(case_file_file_path) and os.path.exists(case_data_file_path) a
 
         print('The case is all yours, detective...')
         time.sleep(2)
-        UserInteraction.commands()
+        MainUI.commands()
         print('')
 
         while True:
             print('')
-            user_menu_choice = input('Enter your choice here --> ')
+            user_menu_choice = input('Enter main UI command here --> ')
             print('')
             if user_menu_choice == '1':
-                UserInteraction.user_menu_interaction(user_menu_choice)
+                MainUI.user_menu_interaction(user_menu_choice)
                 break
             else:
-                UserInteraction.user_menu_interaction(user_menu_choice)
+                MainUI.user_menu_interaction(user_menu_choice)
                 print('')
 else:
     fame = 0
@@ -132,7 +133,7 @@ else:
     Clues.generate_clues_random() # Generates the different clues clues are generated procedurally, using states, and not just whatever is in the case data, culprit data and suspect data
 
     # Checks and validates the input
-    while UserInteraction.question_start_solve() != '1':
+    while MainUI.question_start_solve() != '1':
         print('New Case:')
         Case.generate_case_and_case_file_random()
         Suspects.generate_suspects_report_random()
@@ -150,16 +151,16 @@ else:
 
     print('The case is all yours, detective...')
     time.sleep(2)
-    UserInteraction.commands()
+    MainUI.commands()
     print('')
 
     while True:
         print('')
-        user_menu_choice = input('Enter your choice here --> ')
+        user_menu_choice = input('Enter main UI command here --> ')
         print('')
         if user_menu_choice == '1':
-            UserInteraction.user_menu_interaction(user_menu_choice)
+            MainUI.user_menu_interaction(user_menu_choice)
             break
         else:
-            UserInteraction.user_menu_interaction(user_menu_choice)
+            MainUI.user_menu_interaction(user_menu_choice)
             print('')

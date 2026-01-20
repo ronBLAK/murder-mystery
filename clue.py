@@ -116,6 +116,7 @@ class CluesFramework:
                         clues.append(random_single_note)
                         clues_dict_copy[ClueTypesStates.OTHER].remove(ClueStates.NOTES)
                     # if i were to add another clue under other clues, then i need to have new elif statements that determing how this new clue type in other clue is generated
+                    # also, another place i would have to add another block of code would be in the ui, where the clues with subtypes are handled
                     # #also, if i were to add another clue/clue type under other clues, THEN I WILL ALSO HAVE TO CHANGE THE SELECTED_OTHER_CLUE_NUMBER_NUM VARIABLE FROM BEING HARDCODD TO 1, TO A DYNAMIC NUMBER THAT IS GENERATED VIA CODE, RELATIVE TO THE OTHER CLUES LIST SIZE
             
         return clues
@@ -488,5 +489,3 @@ class Clues:
             final_clues_list[clue_index_in_main_list[i]] = item
             
         Clues.save_clue_data(clues_framework, final_clues_list, clues_visiblisity_status)
-        
-print(CluesFramework.clues_dict[ClueTypesStates.CARELESS_MISTAKES])
