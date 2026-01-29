@@ -348,6 +348,7 @@ class Clues:
     
     # need to change this so that visibilty affects the actual final clue list, and not the clue types.
     # this flags whether the detetcive can see a certain clue or not - this was changed from the clue frameworks class because it is required here and not there - plus, when it was created there, accessing it from this class is impossible without extensive, unnecessary means
+    # this implementation is irrelevant for now - as the logic for hidden clues to occur has been postponed to after the full game is done
     def get_clue_type_visiblity_status(clues_num):
         visibility_status = []
         

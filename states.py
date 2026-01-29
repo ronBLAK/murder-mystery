@@ -31,3 +31,16 @@ class NoteStates(Enum):
     NOTES_NAME_JUMBLED = 'notes name jumbled'
     NOTES_NAME_OFFSET = 'notes name offset'
     NOTES_NAME_ALGEBRA = 'notes name algebra'
+    
+
+
+
+
+
+# this class stored all the suspect states
+class SuspectStates(Enum):
+    DUMMY = 'dummy suspect' # dummy suspects exist only because certain of their features seem to match the ones found as clues
+    MOTIVE = 'motive only' # these suspects only have motive
+    OPPURTUNITY = 'oppurtunity only' # these suspects only have oppurtunity
+    DUMMY_CULPRIT = 'motive + oppurtunity + inaction' # these suspects had the same conditions as the culprit with the victim, but did not take the leap of action 
+    CULPRIT = 'motive + oppurtunity + action' # this is the culprit

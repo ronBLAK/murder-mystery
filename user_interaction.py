@@ -185,7 +185,7 @@ class MainUI:
             print('')
             time.sleep(2)
             MainUI.commands()
-        elif user_choice == '5': # view suspect information
+        elif user_choice == '6': # view suspect information
             print('You can view all the suspects profiles here')
             print('')
             print('')

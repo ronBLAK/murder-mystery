@@ -69,7 +69,7 @@ if os.path.exists(case_file_file_path) and os.path.exists(case_data_file_path) a
         Detective.get_detective_info_as_dict(detective_name, fame, cases_solved)
         print('')
 
-        print(f'Hello {detective_name}. I am Trevor, your in-charge. You seem new to this\nfield. Let\'s see what you\'ve got. You have a new case waiting for you.')
+        print(f'Hello {detective_name}. I am Trevor, your in-charge. You seem new to this\nfield. Let\'s see what you\nve got. You have a new case waiting for you\nthat has been transferred from\nthe police dept.')
         print('')
 
         # Generates random case, and random case file according to information from the case
@@ -108,7 +108,7 @@ if os.path.exists(case_file_file_path) and os.path.exists(case_data_file_path) a
             print('')
             user_menu_choice = input('Enter main UI command here --> ')
             print('')
-            if user_menu_choice == '1':
+            if user_menu_choice == '0':
                 MainUI.user_menu_interaction(user_menu_choice)
                 break
             else:
@@ -158,7 +158,7 @@ else:
         print('')
         user_menu_choice = input('Enter main UI command here --> ')
         print('')
-        if user_menu_choice == '1':
+        if user_menu_choice == '0':
             MainUI.user_menu_interaction(user_menu_choice)
             break
         else:

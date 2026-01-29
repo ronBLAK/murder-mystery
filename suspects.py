@@ -1,6 +1,7 @@
 import random
 import json
 from save import Save
+from states import SuspectStates
 from paths import SAVE_DIRECTORY
 
 class Suspects:
@@ -19,11 +20,15 @@ class Suspects:
         'European': ['olive', 'white', 'caucasian']
     }
     
+    # this is the list that holds the different types of backstory relationships between the suspects and the victim
+    suspect_motive_list = ['grudge', 'jealousy', 'revenge', 'resentment', 'family conflict', 'abuse history', 'business conflict', 'debt']
+    
     # generate the suspects data, just like the case data
-    def generate_suspect_values(suspect_name, hair_color, height_type, blood_type, eye_color, ethnicity, skin_color, fingerprint_id, footprint_dimensions, save = True):
+    def generate_suspect_values(suspect_name, hair_color, height_type, blood_type, eye_color, ethnicity, skin_color, fingerprint_id, footprint_dimensions, motives, save = True):
         # all the variables this functions needs to function - the lists and other derived values
         suspects_info = {
             'suspect names': suspect_name,
+            'suspect motives': motives,
             'hair colors': hair_color,
             'height types': height_type,
             'blood types': blood_type,
@@ -39,11 +44,14 @@ class Suspects:
             
         return suspects_info
     
-    def generate_suspect_report(suspect_number, suspect_name, hair_color, height_type, blood_type, eye_color, ethnicity, skin_color, save = True):
+    def generate_suspect_report(suspect_number, suspect_name, hair_color, height_type, blood_type, eye_color, ethnicity, skin_color, motives, save = True):
         suspect_report_list = []
         
         for suspect in range(suspect_number):
-            suspect_report = f'The {suspect_name[suspect]} is a {hair_color[suspect]} haired {height_type[suspect]} individual\nwith a {blood_type[suspect]} blood group. Suspect is {skin_color[suspect]} toned, with {eye_color[suspect]} eyes and is {ethnicity[suspect]}'
+            if motives[suspect] != None:
+                suspect_report = f'{suspect_name[suspect]} is a {hair_color[suspect]} haired {height_type[suspect]} individual\nwith a {blood_type[suspect]} blood group. Suspect is {skin_color[suspect]} toned, with {eye_color[suspect]} eyes and is {ethnicity[suspect]}. {suspect_name[suspect]} seems to\nhave some sort of a {motives[suspect]} with the victim.'
+            else:
+                suspect_report = f'{suspect_name[suspect]} is a {hair_color[suspect]} haired {height_type[suspect]} individual\nwith a {blood_type[suspect]} blood group. Suspect is {skin_color[suspect]} toned, with {eye_color[suspect]} eyes and is {ethnicity[suspect]}'
             
             suspect_report_list.append(suspect_report)
             
@@ -148,6 +156,47 @@ class Suspects:
             
         return footprint_dimension_list
     
+    # this returns the state of each suspect in the case - dummy, culprit etc
+    def get_suspect_motives(culprit_index, motives_list, suspect_number):
+        suspect_state_bool_mapping_dict = {} # this dict holds the motive/oppurtunity for each suspect
+        suspect_state_list = [] # this is the list that holds the actual state for the suspect, retrieved based on the motive/oppurtunity combination that is derived
+        suspect_motive_list = [] # this is the list that holds the selected motive based on the state that was picked for each suspect
+        
+        # this for loop works to get the basic building blocks of the suspect state system - the true/false booleay system for motive/oppurtunity
+        for i in range(suspect_number):
+            # if the culprit index is the key that is being iterated over, then it assigns motive and oppurtunity as true
+            if i == culprit_index:
+                suspect_state_bool_mapping_dict[i] = [True, True]
+            else:
+                suspect_state_bool_mapping_dict[i] = [None] * 2
+                
+                # appends true or false for the motive and oppurtunity element - both elements random for each suspect
+                suspect_state_bool_mapping_dict[i][0] = random.choice([True, False])
+                suspect_state_bool_mapping_dict[i][1] = random.choice([True, False])
+        
+        # this for loop loops through the dictionary that maps the bool list to the key (culprit index), and selects a state based on the combination that it finds for each suspect
+        for i in suspect_state_bool_mapping_dict:
+            if suspect_state_bool_mapping_dict[i][0] == True and suspect_state_bool_mapping_dict[i][1] == True:
+                if i == culprit_index:
+                    suspect_state_list.append(SuspectStates.CULPRIT)
+                else:
+                    suspect_state_list.append(SuspectStates.DUMMY_CULPRIT)
+            elif suspect_state_bool_mapping_dict[i][0] == True and suspect_state_bool_mapping_dict[i][1] == False:
+                suspect_state_list.append(SuspectStates.MOTIVE)
+            elif suspect_state_bool_mapping_dict[i][0] == False and suspect_state_bool_mapping_dict[i][1] == True:
+                suspect_state_list.append(SuspectStates.OPPURTUNITY)
+            elif suspect_state_bool_mapping_dict[i][0] == False and suspect_state_bool_mapping_dict[i][1] == False:
+                suspect_state_list.append(SuspectStates.DUMMY) 
+        
+        # this loop loops through the list that stores the states for the suspects, and generates a motive for each suspect based on their state        
+        for i in suspect_state_list:
+            if i != SuspectStates.DUMMY and i != SuspectStates.OPPURTUNITY:
+                suspect_motive_list.append(random.choice(motives_list))
+            else:
+                suspect_motive_list.append(None)
+                
+        return suspect_motive_list, suspect_state_list
+                
     # brings the two generate functions decalared above, from one function, which is declared below
     def generate_suspects_report_random():
         suspects_report_values_file = 'suspects info.json'
@@ -156,8 +205,10 @@ class Suspects:
             case_data = json.load(file)
                 
         suspect_names = case_data['case details']['selected suspects']
+        culprit_index = case_data['case details']['culprit index suspects list']
         
         # sets each of the derived values into its own variable to use in the first generate method, and save the data
+        selected_motives, _ = Suspects.get_suspect_motives(culprit_index, Suspects.suspect_motive_list, 5)
         selected_hair_colors = Suspects.get_hair_color(Suspects.suspect_hair_color_list, 5)
         selected_height_types = Suspects.get_height_type(Suspects.suspect_height_type_list, 5)
         selected_blood_types = Suspects.get_blood_type(Suspects.suspect_blood_type_list, 5)
@@ -167,7 +218,7 @@ class Suspects:
         selected_fingerprint_id = Suspects.get_fingerprint_id(5)
         selected_footprint_dimension = Suspects.get_footprint_dimension(5)
         
-        Suspects.generate_suspect_values(suspect_names, selected_hair_colors, selected_height_types, selected_blood_types, selected_eye_color, selected_ethnicity, selected_skin_color, selected_fingerprint_id, selected_footprint_dimension)
+        Suspects.generate_suspect_values(suspect_names, selected_hair_colors, selected_height_types, selected_blood_types, selected_eye_color, selected_ethnicity, selected_skin_color, selected_fingerprint_id, selected_footprint_dimension, selected_motives)
         
         # retrieves the saved values, thanks to the previous method, and use those values to generate the actual report
         with open(SAVE_DIRECTORY / suspects_report_values_file, 'r') as json_file:
@@ -179,8 +230,9 @@ class Suspects:
         pulled_eye_colors = suspect_info.get('eye colors')
         pulled_ethnicity = suspect_info.get('ethnicity')
         pulled_skin_color = suspect_info.get('skin colors')
+        pulled_motives = suspect_info.get('suspect motives')
         
-        Suspects.generate_suspect_report(5, suspect_names, pulled_hair_colors, pulled_height_types, pulled_blood_types, pulled_eye_colors, pulled_ethnicity, pulled_skin_color)
+        Suspects.generate_suspect_report(5, suspect_names, pulled_hair_colors, pulled_height_types, pulled_blood_types, pulled_eye_colors, pulled_ethnicity, pulled_skin_color, pulled_motives)
         
         
 class SuspectIllusion:
