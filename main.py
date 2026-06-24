@@ -78,7 +78,7 @@ if os.path.exists(case_file_file_path) and os.path.exists(case_data_file_path) a
         Witnesses.generate_witness_and_witness_file_random() # Generates random information for the witnesses - names also generated from this function, based on the number of witnesses generted in the case system
         Culprit.set_culprit_details_final() # takes information from each of the attribute list in the suspects save file, regarding only the culprit, and saves it to another file
         SuspectIllusion.generate_suspect_attributes_after_illuded() # Generates a new set of values for the suspect attributes but procedurally injecting culprit data into the suspect attribute data list, and updating the suspects info save file accordingly
-        SuspectIllusion.generate_suspect_report_random() # Generates the suspect report based on the new set of values for the suspect attributes, and saves the report to a save file
+        SuspectIllusion.generate_suspect_report_random() # Generates the suspect report based on the new set of values for the suspect attributes, and saves the report to a save file  
         Victim.generate_victim_data_random() # Generates random information for the victim - names are generated with the case, and not from within the victim class
         Clues.generate_clues_random() # Generates the different clues clues are generated procedurally, using states, and not just whatever is in the case data, culprit data and suspect data
         
