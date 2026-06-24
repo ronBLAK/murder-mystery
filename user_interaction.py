@@ -90,6 +90,8 @@ class CluesUI:
                         print(f'    {selected_clues[shared_index]}      ')
                         print('')
                         time.sleep(2)
+                        
+                        break # breaks the for loop if any of the note types is found in the framework - as there is only one note clue, there will only be one note type in the framework, hence why it is ok to break after the first one is found
                 else:
                     print('')
                     print('-- that clue is not available for this case. you can only look for clues that exist for this case --')

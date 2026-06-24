@@ -13,43 +13,59 @@ class CluesFramework:
         ClueTypesStates.OTHER,
         ClueTypesStates.CARELESS_MISTAKES
     ]
-    
-    with open(SAVE_DIRECTORY / 'case data.json', 'r') as json_file:
-        case_data = json.load(json_file)
-        
-    murder_weapon = case_data['murder details']['murder weapon']
-    
-    if murder_weapon == 'water':
-            clues_dict = {
-            # need to make it so that the options for blood and hair are available only if there is a wound by the knife or the gun - otherwise, only hair can be found for now
-            ClueTypesStates.BIOLOGICAL_EVIDENCE: [
-                ClueStates.HAIR,
-                ClueStates.BLOOD
-            ],
-            ClueTypesStates.CARELESS_MISTAKES: [
-                ClueStates.FINGERPRINTS,
-                ClueStates.FOOTPRINTS
-            ],
-            ClueTypesStates.OTHER: [
-                ClueStates.NOTES # add new elif/else statement in other clue selection process, if i find other plausible clues/clue types that i can add to this other clue list
-            ]
-        }
-    else:
-            clues_dict = {
-            # need to make it so that the options for blood and hair are available only if there is a wound by the knife or the gun - otherwise, only hair can be found for now
-            ClueTypesStates.BIOLOGICAL_EVIDENCE: [
-                ClueStates.HAIR,
-                ClueStates.BLOOD
-            ],
-            ClueTypesStates.CARELESS_MISTAKES: [
-                ClueStates.MURDER_WEAPON,
-                ClueStates.FINGERPRINTS,
-                ClueStates.FOOTPRINTS
-            ],
-            ClueTypesStates.OTHER: [
-                ClueStates.NOTES # add new elif/else statement in other clue selection process, if i find other plausible clues/clue types that i can add to this other clue list
-            ]
-        }
+
+    # will be initialized later based on the murder weapon found in case data
+    clues_dict = None
+
+    @classmethod
+    def initialize_from_case(cls):
+        """
+        Initializes clues_dict based on the murder weapon stored in case data.
+        Must be called after the case has been generated and saved.
+        """
+        case_path = SAVE_DIRECTORY / 'case data.json'
+        if not case_path.exists():
+            raise FileNotFoundError(
+                f"Expected case data at {case_path}, but it does not exist. "
+                "Generate a case before initializing clues."
+            )
+
+        with open(case_path, 'r') as json_file:
+            case_data = json.load(json_file)
+
+        murder_weapon = case_data['murder details']['murder weapon']
+
+        if murder_weapon == 'water':
+            cls.clues_dict = {
+                # need to make it so that the options for blood and hair are available only if there is a wound by the knife or the gun - otherwise, only hair can be found for now
+                ClueTypesStates.BIOLOGICAL_EVIDENCE: [
+                    ClueStates.HAIR,
+                    ClueStates.BLOOD
+                ],
+                ClueTypesStates.CARELESS_MISTAKES: [
+                    ClueStates.FINGERPRINTS,
+                    ClueStates.FOOTPRINTS
+                ],
+                ClueTypesStates.OTHER: [
+                    ClueStates.NOTES  # add new elif/else statement in other clue selection process, if i find other plausible clues/clue types that i can add to this other clue list
+                ]
+            }
+        else:
+            cls.clues_dict = {
+                # need to make it so that the options for blood and hair are available only if there is a wound by the knife or the gun - otherwise, only hair can be found for now
+                ClueTypesStates.BIOLOGICAL_EVIDENCE: [
+                    ClueStates.HAIR,
+                    ClueStates.BLOOD
+                ],
+                ClueTypesStates.CARELESS_MISTAKES: [
+                    ClueStates.MURDER_WEAPON,
+                    ClueStates.FINGERPRINTS,
+                    ClueStates.FOOTPRINTS
+                ],
+                ClueTypesStates.OTHER: [
+                    ClueStates.NOTES  # add new elif/else statement in other clue selection process, if i find other plausible clues/clue types that i can add to this other clue list
+                ]
+            }
 
     other_clues_dict = {
         ClueStates.NOTES: [
@@ -474,6 +490,10 @@ class Clues:
         return final_biological_clues, final_careless_mistakes, final_murder_weapon_clues, final_other_clues
     
     def generate_clues_random():
+        # lazily initialize the clue framework from case data if needed
+        if CluesFramework.clues_dict is None:
+            CluesFramework.initialize_from_case()
+
         clue_num, clues_framework, _ = CluesFramework.generate_all_clues_framework() # this is where the function defined for the frameworks in the frameworks class is called to actually generate the clues, based on the framework generated
         
         clues_visiblisity_status = Clues.get_clue_type_visiblity_status(clue_num) # this might not be the final location of this function call - will need to change its place accordingly
