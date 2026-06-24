@@ -1,0 +1,72 @@
+{
+    "suspect names": [
+        "Reuben",
+        "Corey",
+        "Cooper",
+        "Josh",
+        "Ben"
+    ],
+    "suspect motives": [
+        "debt",
+        "debt",
+        "grudge",
+        "abuse history",
+        "abuse history"
+    ],
+    "hair colors": [
+        "blonde",
+        "blonde",
+        "blonde",
+        "blue",
+        "black"
+    ],
+    "height types": [
+        "short",
+        "short",
+        "short",
+        "short",
+        "short"
+    ],
+    "blood types": [
+        "O+",
+        "O+",
+        "A-",
+        "O+",
+        "B+"
+    ],
+    "eye colors": [
+        "brown",
+        "grey",
+        "brown",
+        "brown",
+        "red"
+    ],
+    "ethnicity": [
+        "African",
+        "Indian",
+        "African",
+        "African",
+        "African"
+    ],
+    "skin colors": [
+        "dark",
+        "dark",
+        "light",
+        "dark",
+        "caucasian"
+    ],
+    "fingerprint IDs": [
+        17580,
+        69061,
+        83982,
+        92203,
+        43552
+    ],
+    "footprint dimensions": [
+        "28.8 x 11",
+        "28.8 x 11",
+        "23.5 x 9",
+        "24.0 x 9",
+        "21.4 x 8"
+    ]
+}

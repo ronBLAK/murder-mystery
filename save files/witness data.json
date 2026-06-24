@@ -1,0 +1,16 @@
+{
+    "is witness present": true,
+    "witness number": "1",
+    "witness names": [
+        "Mason"
+    ],
+    "mode of perception": [
+        "saw"
+    ],
+    "event witnessed": [
+        "the killer running away"
+    ],
+    "is witness suspect": [
+        false
+    ]
+}
