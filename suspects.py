@@ -198,9 +198,7 @@ class Suspects:
         return suspect_motive_list, suspect_state_list
                 
     # brings the two generate functions decalared above, from one function, which is declared below
-    def generate_suspects_report_random():
-        suspects_report_values_file = 'suspects info.json'
-        
+    def generate_suspects_values_random():
         with open(SAVE_DIRECTORY / 'case data.json', 'r') as file:
             case_data = json.load(file)
                 
@@ -219,20 +217,6 @@ class Suspects:
         selected_footprint_dimension = Suspects.get_footprint_dimension(5)
         
         Suspects.generate_suspect_values(suspect_names, selected_hair_colors, selected_height_types, selected_blood_types, selected_eye_color, selected_ethnicity, selected_skin_color, selected_fingerprint_id, selected_footprint_dimension, selected_motives)
-        
-        # retrieves the saved values, thanks to the previous method, and use those values to generate the actual report
-        with open(SAVE_DIRECTORY / suspects_report_values_file, 'r') as json_file:
-            suspect_info = json.load(json_file)
-            
-        pulled_hair_colors = suspect_info.get('hair colors')
-        pulled_height_types = suspect_info.get('height types')
-        pulled_blood_types = suspect_info.get('blood types')
-        pulled_eye_colors = suspect_info.get('eye colors')
-        pulled_ethnicity = suspect_info.get('ethnicity')
-        pulled_skin_color = suspect_info.get('skin colors')
-        pulled_motives = suspect_info.get('suspect motives')
-        
-        Suspects.generate_suspect_report(5, suspect_names, pulled_hair_colors, pulled_height_types, pulled_blood_types, pulled_eye_colors, pulled_ethnicity, pulled_skin_color, pulled_motives)
         
         
 class SuspectIllusion:
@@ -389,3 +373,21 @@ class SuspectIllusion:
         SuspectIllusion.apply_distraction(SuspectIllusion.ethnicity, indices_to_swap_ethnicity)
         SuspectIllusion.apply_distraction(SuspectIllusion.skin_color, indices_to_swap_skin_color)
         SuspectIllusion.apply_distraction(SuspectIllusion.footprint_dimensions, indices_to_swap_footprint_dimension)
+
+    def generate_suspect_report_random():
+        suspects_report_values_file = 'suspects info.json'
+        
+        # retrieves the saved values, thanks to the previous method, and use those values to generate the actual report
+        with open(SAVE_DIRECTORY / suspects_report_values_file, 'r') as json_file:
+            suspect_info = json.load(json_file)
+
+        pulled_suspect_names = suspect_info.get('suspect names')    
+        pulled_hair_colors = suspect_info.get('hair colors')
+        pulled_height_types = suspect_info.get('height types')
+        pulled_blood_types = suspect_info.get('blood types')
+        pulled_eye_colors = suspect_info.get('eye colors')
+        pulled_ethnicity = suspect_info.get('ethnicity')
+        pulled_skin_color = suspect_info.get('skin colors')
+        pulled_motives = suspect_info.get('suspect motives')
+        
+        Suspects.generate_suspect_report(5, pulled_suspect_names, pulled_hair_colors, pulled_height_types, pulled_blood_types, pulled_eye_colors, pulled_ethnicity, pulled_skin_color, pulled_motives)
