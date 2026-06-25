@@ -17,11 +17,11 @@ class Save:
             json.dump(case_file_to_save, json_file, indent= 4)
         
     # used to save all information regarding the detective (name, cases solved, accuracy etc)    
-    def save_detective(dective_info):
+    def save_detective(detective_info):
         file_path = SAVE_DIRECTORY / 'detective data.json'
         
         with open(file_path, 'w') as json_file:
-            json.dump(dective_info, json_file, indent= 4)
+            json.dump(detective_info, json_file, indent= 4)
     
     # used to save all the suspects info - from the methods defined later, used with this method        
     def save_suspects_info(suspects_info):
