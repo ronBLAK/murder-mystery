@@ -23,7 +23,7 @@ class Victim:
             'name': name,
             'hair color': hair_color,
             'height type': height_type,
-            'blood_type': blood_type,
+            'blood type': blood_type,
             'eye color': eye_color,
             'ethnicity': ethnicity,
             'skin color': skin_color
