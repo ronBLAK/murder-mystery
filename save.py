@@ -23,13 +23,14 @@ class Save:
         with open(file_path, 'w') as json_file:
             json.dump(detective_info, json_file, indent= 4)
     
-    # used to save all the suspects info - from the methods defined later, used with this method        
+    # used to save all the suspects data components - the bricks that make up the file for each suspect - from the methods defined later in the suspects class, used with this method        
     def save_suspects_info(suspects_info):
         file_path = SAVE_DIRECTORY / 'suspects info.json'
         
         with open(file_path, 'w') as json_file:
             json.dump(suspects_info, json_file, indent= 4)
-            
+
+    # used to save the suspects file - the complete file for each suspect (this can be read in pure english logical sentences) - from the methods defined later in the suspects class, used with this method        
     def save_suspects_file(suspects_file):
         file_path = SAVE_DIRECTORY / 'suspects file.json'
         
@@ -43,33 +44,51 @@ class Save:
         with open(file_path, 'w') as json_file:
             json.dump(notebook_content, json_file, indent= 4)
     
-    # used to save the witness info - if there are any witnesses        
+    # used to save the witness info - if there are any witnesses - saves the different components that make up the witness file      
     def save_witness_info(witnesses_info):
         file_path = SAVE_DIRECTORY / 'witness data.json'
         
         with open(file_path, 'w') as json_file:
             json.dump(witnesses_info, json_file, indent= 4)
-            
+
+    # used to save the witness file - if there are any witnesses - saves the file that is presented to the detective, which contains all the information about the witnesses.        
     def save_witness_file(witness_file):
         file_path = SAVE_DIRECTORY / 'witness file.json'
         
         with open(file_path, 'w') as json_file:
             json.dump(witness_file, json_file, indent= 4)
-            
+
+    # used to save the culprit info - saves the different components that make up the culprit file        
     def save_culprit_info(culprit_details):
         file_path = SAVE_DIRECTORY / 'culprit data.json'
         
         with open(file_path, 'w') as json_file:
             json.dump(culprit_details, json_file, indent= 4)
-            
+
+    # used to save the different components that make up the culprit profile        
     def save_victim_data(victim_data):
         file_path = SAVE_DIRECTORY / 'victim data.json'
         
         with open(file_path, 'w') as json_file:
             json.dump(victim_data, json_file, indent= 4)
-            
+
+    # used to save the different components that make up the clue profile        
     def save_clue_data(clue_data):
         file_path = SAVE_DIRECTORY / 'clue data.json'
         
         with open(file_path, 'w') as json_file:
             json.dump(clue_data, json_file, indent= 4)
+
+    # used to save the different components that make up the alibis
+    def save_alibi_data(alibi_data):
+        file_path = SAVE_DIRECTORY / 'alibi data.json'
+        
+        with open(file_path, 'w') as json_file:
+            json.dump(alibi_data, json_file, indent= 4)
+
+    # used to save the final alibi file - the complete file for each suspect (this can be read in pure english logical sentences) - from the methods defined later in the suspects class, used with this method
+    def save_alibi_file(alibi_file):
+        file_path = SAVE_DIRECTORY / 'alibi file.json'
+        
+        with open(file_path, 'w') as json_file:
+            json.dump(alibi_file, json_file, indent= 4)
