@@ -8,7 +8,7 @@ class Case:
     culprit_name_list = ["Jerome", "Max", "Zach", "Tom", "Carl", "Tim", "Cooper", "Shaw", "Mat", "Otto", "George", "Ben", "Brent", "Vincent", "Stretton", "Josh", "Reuben", "Alex", "Mason", "Jamie", "Corey", "Ian"] # holds the different possible names for the culprit
     victim_name_list = ['Sten', 'Troy', 'Dan'] # holds the different possible names for the victim
     murder_weapon_list = ['knife', 'gun', 'baseball bat', 'water'] # holds the different possible murder weapons
-    murder_location_list = ['beach', 'park', 'house'] # holds the different possible murder locations
+    murder_location_list = ['home', 'work', 'school', 'gym', 'bar', 'restaurant', 'park', 'shopping mall', 'beach', 'park'] # holds the different possible murder locations
     weather_list = ['clear', 'rainy', 'foggy', 'windy'] # hold the different possible weather types
     time_of_day_list = ['dawn', 'morning', 'noon', 'afternoon', 'evening', 'dusk', 'night', 'midnight', 'late night'] # holds the different possible time of day that the incident took place
 
