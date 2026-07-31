@@ -10,9 +10,7 @@ class Suspects:
     suspect_blood_type_list = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'] # specifies the suspect's blood type
     suspect_eye_color_list = ['black', 'brown', 'red', 'hazel', 'grey', 'blue'] # specifies the suspect's eye color
     suspect_ethnicity_list = ['Asian', 'Indian', 'African', 'American', 'European'] # specifies the suspect's ethnicity
-    suspect_location_before_crime_list = ['home', 'work', 'school', 'gym', 'bar', 'restaurant', 'park', 'shopping mall', 'beach', 'park'] # specifies the suspect's location before the crime
-    suspect_location_after_crime_list = ['home', 'work', 'school', 'gym', 'bar', 'restaurant', 'park', 'shopping mall', 'beach', 'park'] # specifies the suspect's location after the crime
-
+    suspect_location_list = ['home', 'work', 'school', 'gym', 'bar', 'restaurant', 'park', 'shopping mall', 'beach', 'park'] # specifies the suspect's location before the crime
     suspect_clothing_color_list = ['black', 'white', 'red', 'blue', 'green', 'yellow', 'orange', 'purple', 'brown', 'grey'] # specifies the suspect's clothing color
     suspect_top_list = ['t-shirt', 'shirt', 'hoodie', 'jacket', 'coat', 'sweater', 'dress', 'skirt', 'pants', 'shorts'] # specifies the suspect's top clothing type
     suspect_bottom_list = ['pants', 'shorts', 'jeans', 'plazos', 'bell bottoms'] # specifies the suspect's bottom clothing type
@@ -30,7 +28,7 @@ class Suspects:
     suspect_motive_list = ['grudge', 'jealousy', 'revenge', 'resentment', 'family conflict', 'abuse history', 'business conflict', 'debt']
     
     # generate the suspects data, just like the case data
-    def generate_suspect_values(suspect_name, hair_color, height_type, blood_type, eye_color, ethnicity, skin_color, fingerprint_id, footprint_dimensions, motives, location_before_crime, location_after_crime, suspect_top, suspect_bottom, suspect_top_color, suspect_bottom_color, save = True):
+    def generate_suspect_values(suspect_name, hair_color, height_type, blood_type, eye_color, ethnicity, skin_color, fingerprint_id, footprint_dimensions, motives, location_before_crime, location_during_crime, location_after_crime, suspect_top, suspect_bottom, suspect_top_color, suspect_bottom_color, save = True):
         # all the variables this functions needs to function - the lists and other derived values
         suspects_info = {
             'suspect names': suspect_name,
@@ -44,6 +42,7 @@ class Suspects:
             'fingerprint IDs': fingerprint_id,
             'footprint dimensions': footprint_dimensions,
             'location before crime': location_before_crime,
+            'location during crime': location_during_crime,
             'location after crime': location_after_crime,
             'top clothing': suspect_top,
             'bottom clothing': suspect_bottom,
@@ -56,14 +55,14 @@ class Suspects:
             
         return suspects_info
     
-    def generate_suspect_report(suspect_number, suspect_name, hair_color, height_type, blood_type, eye_color, ethnicity, skin_color, motives, location_before_crime, location_after_crime, suspect_top, suspect_bottom, suspect_top_color, suspect_bottom_color, save = True):
+    def generate_suspect_report(suspect_number, suspect_name, hair_color, height_type, blood_type, eye_color, ethnicity, skin_color, motives, location_before_crime, location_during_crime, location_after_crime, suspect_top, suspect_bottom, suspect_top_color, suspect_bottom_color, save = True):
         suspect_report_list = []
         
         for suspect in range(suspect_number):
             if motives[suspect] != None:
-                suspect_report = f'{suspect_name[suspect]} is a {hair_color[suspect]} haired {height_type[suspect]} individual\nwith a {blood_type[suspect]} blood group. Suspect is {skin_color[suspect]} toned, with {eye_color[suspect]} eyes and is {ethnicity[suspect]}. {suspect_name[suspect]} seems to\nhave some sort of a {motives[suspect]} with the victim. Their location was traced at {location_before_crime[suspect]} before the crime and at the {location_after_crime[suspect]} after the crime.\nSuspect was seen wearing a {suspect_top_color[suspect]} {suspect_top[suspect]} and {suspect_bottom_color[suspect]} {suspect_bottom[suspect]}.'
+                suspect_report = f'{suspect_name[suspect]} is a {hair_color[suspect]} haired {height_type[suspect]} individual\nwith a {blood_type[suspect]} blood group. Suspect is {skin_color[suspect]} toned, with {eye_color[suspect]} eyes and is {ethnicity[suspect]}. {suspect_name[suspect]} seems to\nhave some sort of a {motives[suspect]} with the victim. Their location was traced at {location_before_crime[suspect]} before the crime, at the {location_during_crime[suspect]} during the crime and at the {location_after_crime[suspect]} after the crime.\nSuspect was seen wearing a {suspect_top_color[suspect]} {suspect_top[suspect]} and {suspect_bottom_color[suspect]} {suspect_bottom[suspect]}.'
             else:
-                suspect_report = f'{suspect_name[suspect]} is a {hair_color[suspect]} haired {height_type[suspect]} individual\nwith a {blood_type[suspect]} blood group. Suspect is {skin_color[suspect]} toned, with {eye_color[suspect]} eyes and is {ethnicity[suspect]}. {suspect_name[suspect]} does not seem to have any sort of a motive with the victim. Their location was traced at {location_before_crime[suspect]} before the crime and at the {location_after_crime[suspect]} after the crime.\nSuspect was seen wearing a {suspect_top_color[suspect]} {suspect_top[suspect]} and {suspect_bottom_color[suspect]} {suspect_bottom[suspect]}.'
+                suspect_report = f'{suspect_name[suspect]} is a {hair_color[suspect]} haired {height_type[suspect]} individual\nwith a {blood_type[suspect]} blood group. Suspect is {skin_color[suspect]} toned, with {eye_color[suspect]} eyes and is {ethnicity[suspect]}. {suspect_name[suspect]} does not seem to have any sort of a motive with the victim. Their location was traced at {location_before_crime[suspect]} before the crime, at the {location_during_crime[suspect]} during the crime and at the {location_after_crime[suspect]} after the crime.\nSuspect was seen wearing a {suspect_top_color[suspect]} {suspect_top[suspect]} and {suspect_bottom_color[suspect]} {suspect_bottom[suspect]}.'
             
             suspect_report_list.append(suspect_report)
             
@@ -220,6 +219,24 @@ class Suspects:
         
         return location_before_crime_list
 
+    # this function generates the location of each suspect during the crime was committed, and returns a list of those locations
+    # this function creates a list of size suspect number because the indices checked for, to find the culprit index and assign the culprit location during the crime, as the culprit has to be at the crime scene during the crime.
+    def get_suspect_location_during_crime(possible_locations, suspect_number, culprit_index):
+        with open(SAVE_DIRECTORY / 'case data.json', 'r') as file:
+            case_data = json.load(file)
+
+        location_during_crime_list = [None] * suspect_number # this list holds the location of each suspect during the crime
+
+        # this for loop loops through the number of suspects, and randomly selects a location from the possible locations list for each suspect
+        for i in range(suspect_number):
+            if i == culprit_index:
+                location_during_crime_list[i] = case_data['murder details']['murder location']
+            else:
+                location_during_crime = random.choice(possible_locations)
+                location_during_crime_list[i] = location_during_crime
+        
+        return location_during_crime_list
+
     # this function generates the location of each suspect after the crime was committed, and returns a list of those locations
     def get_suspect_location_after_crime(possible_locations, suspect_number):
         location_after_crime_list = []
@@ -278,14 +295,15 @@ class Suspects:
         selected_skin_color = Suspects.get_skin_color(selected_ethnicity, Suspects.suspect_skin_color_dict, 5)
         selected_fingerprint_id = Suspects.get_fingerprint_id(5)
         selected_footprint_dimension = Suspects.get_footprint_dimension(5)
-        selected_location_before_crime = Suspects.get_suspect_location_before_crime(Suspects.suspect_location_before_crime_list, 5)
-        selected_location_after_crime = Suspects.get_suspect_location_after_crime(Suspects.suspect_location_after_crime_list, 5)
+        selected_location_before_crime = Suspects.get_suspect_location_before_crime(Suspects.suspect_location_list, 5)
+        selected_location_during_crime = Suspects.get_suspect_location_during_crime(Suspects.suspect_location_list, 5, culprit_index)
+        selected_location_after_crime = Suspects.get_suspect_location_after_crime(Suspects.suspect_location_list, 5)
         selected_suspect_top = Suspects.get_suspect_top(Suspects.suspect_top_list, 5)
         selected_suspect_bottom = Suspects.get_suspect_bottom(Suspects.suspect_bottom_list, 5)
         selected_suspect_top_color = Suspects.get_suspect_clothing_color(Suspects.suspect_clothing_color_list, 5)
         selected_bottom_color = Suspects.get_suspect_clothing_color(Suspects.suspect_clothing_color_list, 5)
         
-        Suspects.generate_suspect_values(suspect_names, selected_hair_colors, selected_height_types, selected_blood_types, selected_eye_color, selected_ethnicity, selected_skin_color, selected_fingerprint_id, selected_footprint_dimension, selected_motives, selected_location_before_crime, selected_location_after_crime, selected_suspect_top, selected_suspect_bottom, selected_suspect_top_color, selected_bottom_color)
+        Suspects.generate_suspect_values(suspect_names, selected_hair_colors, selected_height_types, selected_blood_types, selected_eye_color, selected_ethnicity, selected_skin_color, selected_fingerprint_id, selected_footprint_dimension, selected_motives, selected_location_before_crime, selected_location_during_crime, selected_location_after_crime, selected_suspect_top, selected_suspect_bottom, selected_suspect_top_color, selected_bottom_color)
         
         
 class SuspectIllusion:
@@ -459,10 +477,11 @@ class SuspectIllusion:
         pulled_skin_color = suspect_info.get('skin colors')
         pulled_motives = suspect_info.get('suspect motives')
         pulled_location_before_crime = suspect_info.get('location before crime')
+        pulled_location_during_crime = suspect_info.get('location during crime')
         pulled_location_after_crime = suspect_info.get('location after crime')
         pulled_suspect_top = suspect_info.get('top clothing')
         pulled_suspect_bottom = suspect_info.get('bottom clothing')
         pulled_suspect_top_color = suspect_info.get('top colors')
         pulled_suspect_bottom_color = suspect_info.get('bottom colors')
         
-        Suspects.generate_suspect_report(5, pulled_suspect_names, pulled_hair_colors, pulled_height_types, pulled_blood_types, pulled_eye_colors, pulled_ethnicity, pulled_skin_color, pulled_motives, pulled_location_before_crime, pulled_location_after_crime, pulled_suspect_top, pulled_suspect_bottom, pulled_suspect_top_color, pulled_suspect_bottom_color)
+        Suspects.generate_suspect_report(5, pulled_suspect_names, pulled_hair_colors, pulled_height_types, pulled_blood_types, pulled_eye_colors, pulled_ethnicity, pulled_skin_color, pulled_motives, pulled_location_before_crime, pulled_location_during_crime, pulled_location_after_crime, pulled_suspect_top, pulled_suspect_bottom, pulled_suspect_top_color, pulled_suspect_bottom_color)
