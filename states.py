@@ -57,7 +57,7 @@ class SuspectStates(Enum):
 
 
 # these are the states for the alibi components that the culprit can lie about, and mislead the cops
-class CrucialAlibiComponentStates(Enum):
+class AlibiComponentStates(Enum):
     # these are the crucial alibi components that the culprit can lie about, and mislead the cops
     LOCATION_DURING_CRIME = 'location during crime'
     RELATIONSHIP_WITH_VICTIM = 'suspect status'
@@ -65,7 +65,6 @@ class CrucialAlibiComponentStates(Enum):
     BLOOD_TYPE = 'blood type' # this looks at the suspect blood type
     WITNESS_STATEMENT = 'is witness suspect' # i used the bool that tracks if a suspect is a witness, because then i can manually add the witness component to the final components for the alibi, if a witness is also a suspect - this can be useful to add a chance system for if the culprit is selected as a witness as well - i can code a system where there is a chance that the culprit's alibi/statement does not match their own witness statement, which can be seen as a careless mistake, or the effect of the other option will be that the culprit's alibi as a suspect and witness will remain the same, making the statement airtight and harder to solve
 
-class NonCrucialAlibiComponentStates(Enum):
     # these are the non crucial alibi components that the culprit can lie about, but will not mislead the cops
     WEATHER = 'weather'
     LOCATION_BEFORE_CRIME = 'location before crime'
