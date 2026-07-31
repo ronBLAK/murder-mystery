@@ -28,10 +28,11 @@ class Suspects:
     suspect_motive_list = ['grudge', 'jealousy', 'revenge', 'resentment', 'family conflict', 'abuse history', 'business conflict', 'debt']
     
     # generate the suspects data, just like the case data
-    def generate_suspect_values(suspect_name, hair_color, height_type, blood_type, eye_color, ethnicity, skin_color, fingerprint_id, footprint_dimensions, motives, location_before_crime, location_during_crime, location_after_crime, suspect_top, suspect_bottom, suspect_top_color, suspect_bottom_color, save = True):
+    def generate_suspect_values(suspect_name, hair_color, height_type, blood_type, eye_color, ethnicity, skin_color, fingerprint_id, footprint_dimensions, suspect_states, motives, location_before_crime, location_during_crime, location_after_crime, suspect_top, suspect_bottom, suspect_top_color, suspect_bottom_color, save = True):
         # all the variables this functions needs to function - the lists and other derived values
         suspects_info = {
             'suspect names': suspect_name,
+            'suspect status': suspect_states,
             'suspect motives': motives,
             'hair colors': hair_color,
             'height types': height_type,
@@ -189,19 +190,19 @@ class Suspects:
         for i in suspect_state_bool_mapping_dict:
             if suspect_state_bool_mapping_dict[i][0] == True and suspect_state_bool_mapping_dict[i][1] == True:
                 if i == culprit_index:
-                    suspect_state_list.append(SuspectStates.CULPRIT)
+                    suspect_state_list.append(SuspectStates.CULPRIT.value)
                 else:
-                    suspect_state_list.append(SuspectStates.DUMMY_CULPRIT)
+                    suspect_state_list.append(SuspectStates.DUMMY_CULPRIT.value)
             elif suspect_state_bool_mapping_dict[i][0] == True and suspect_state_bool_mapping_dict[i][1] == False:
-                suspect_state_list.append(SuspectStates.MOTIVE)
+                suspect_state_list.append(SuspectStates.MOTIVE.value)
             elif suspect_state_bool_mapping_dict[i][0] == False and suspect_state_bool_mapping_dict[i][1] == True:
-                suspect_state_list.append(SuspectStates.OPPURTUNITY)
+                suspect_state_list.append(SuspectStates.OPPURTUNITY.value)
             elif suspect_state_bool_mapping_dict[i][0] == False and suspect_state_bool_mapping_dict[i][1] == False:
-                suspect_state_list.append(SuspectStates.DUMMY) 
+                suspect_state_list.append(SuspectStates.DUMMY.value)
         
         # this loop loops through the list that stores the states for the suspects, and generates a motive for each suspect based on their state        
         for i in suspect_state_list:
-            if i != SuspectStates.DUMMY and i != SuspectStates.OPPURTUNITY:
+            if i != SuspectStates.DUMMY.value and i != SuspectStates.OPPURTUNITY.value:
                 suspect_motive_list.append(random.choice(motives_list))
             else:
                 suspect_motive_list.append(None)
@@ -286,7 +287,7 @@ class Suspects:
         culprit_index = case_data['case details']['culprit index suspects list']
         
         # sets each of the derived values into its own variable to use in the first generate method, and save the data
-        selected_motives, _ = Suspects.get_suspect_motives(culprit_index, Suspects.suspect_motive_list, 5)
+        selected_motives, selected_states = Suspects.get_suspect_motives(culprit_index, Suspects.suspect_motive_list, 5)
         selected_hair_colors = Suspects.get_hair_color(Suspects.suspect_hair_color_list, 5)
         selected_height_types = Suspects.get_height_type(Suspects.suspect_height_type_list, 5)
         selected_blood_types = Suspects.get_blood_type(Suspects.suspect_blood_type_list, 5)
@@ -303,7 +304,7 @@ class Suspects:
         selected_suspect_top_color = Suspects.get_suspect_clothing_color(Suspects.suspect_clothing_color_list, 5)
         selected_bottom_color = Suspects.get_suspect_clothing_color(Suspects.suspect_clothing_color_list, 5)
         
-        Suspects.generate_suspect_values(suspect_names, selected_hair_colors, selected_height_types, selected_blood_types, selected_eye_color, selected_ethnicity, selected_skin_color, selected_fingerprint_id, selected_footprint_dimension, selected_motives, selected_location_before_crime, selected_location_during_crime, selected_location_after_crime, selected_suspect_top, selected_suspect_bottom, selected_suspect_top_color, selected_bottom_color)
+        Suspects.generate_suspect_values(suspect_names, selected_hair_colors, selected_height_types, selected_blood_types, selected_eye_color, selected_ethnicity, selected_skin_color, selected_fingerprint_id, selected_footprint_dimension, selected_states, selected_motives, selected_location_before_crime, selected_location_during_crime, selected_location_after_crime, selected_suspect_top, selected_suspect_bottom, selected_suspect_top_color, selected_bottom_color)
         
         
 class SuspectIllusion:
