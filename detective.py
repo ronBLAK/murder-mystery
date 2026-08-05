@@ -4,7 +4,6 @@ from paths import SAVE_DIRECTORY
 
 class Detective:
     # creates a detective profile
-    @staticmethod
     def detective_name():
         name = input("what should the assoiates call you, detective?\n\n") # stores raw name input from user
         formatted_name = name.capitalize() # formats the name to capital letter first

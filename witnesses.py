@@ -31,7 +31,6 @@ class Witnesses:
             
         return witness_data
     
-    @staticmethod
     def generate_witnesses_file(witness_number, witness_name, witness_mode_of_perception, event_witnessed, is_witness_suspect, save = True):
         witness_description_list = []
         

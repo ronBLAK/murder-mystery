@@ -1,3 +1,4 @@
+import random
 from states import AlibiComponentStates
 
 class AlibiComponentFramework:
@@ -19,6 +20,22 @@ class AlibiComponentFramework:
         AlibiComponentStates.CLOTHING_BOTTOM
     ]
 
+    # this function get the truth to lie proportion of each alibi
+    def get_truth_lie_proportions(suspect_number):
+        other_suspect_honesty_proportions_list_of_lists = []
+
+        culprit_honesty_proportion_list = [True] * 2 + [False] * 8 # percentage system for the lies and truths in alibis of culprit (this is done via populating lists of 10 items with true or false)
+        random.shuffle(culprit_honesty_proportion_list) # shuffles the culprit honesty list so that the true and false values are randomly distributed in the lists, so that the alibis generated for the culprit is not predictable
+
+        for i in range(suspect_number):
+            other_suspects_honesty_proportion_list = [True] * 5 + [False] * 5 # percentage system for the lies and truths in alibis of other suspects (this is done via populating lists of 10 items with true or false)
+            random.shuffle(other_suspects_honesty_proportion_list) # shuffles the other suspects honesty list so that the true and false values are randomly distributed in the lists, so that the alibis generated for them are not predictable
+            other_suspect_honesty_proportions_list_of_lists.append(other_suspects_honesty_proportion_list)
+
+        return culprit_honesty_proportion_list, other_suspect_honesty_proportions_list_of_lists
+
+    #def get_alibi_structure(culprit)
+
 class Alibis:
     def generate_alibi_data(suspect_number, alibi_components):
         # generates the alibi data for a given suspect number and alibi components
@@ -28,3 +45,17 @@ class Alibis:
         }
         
         return alibi_data
+
+
+
+
+
+
+
+culprit_honesty_proportions, other_suspects_honesty_proportions_list = AlibiComponentFramework.get_truth_lie_proportions(4)
+
+print(f"culprit honesty proportions: {culprit_honesty_proportions}")
+print(f"suspect 1 alibi proportions: {other_suspects_honesty_proportions_list[0]}")
+print(f"suspect 2 alibi proportions: {other_suspects_honesty_proportions_list[1]}")
+print(f"suspect 3 alibi proportions: {other_suspects_honesty_proportions_list[2]}")
+print(f"suspect 4 alibi proportions: {other_suspects_honesty_proportions_list[3]}")

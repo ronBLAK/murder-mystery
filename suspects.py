@@ -14,6 +14,7 @@ class Suspects:
     suspect_clothing_color_list = ['black', 'white', 'red', 'blue', 'green', 'yellow', 'orange', 'purple', 'brown', 'grey'] # specifies the suspect's clothing color
     suspect_top_list = ['t-shirt', 'shirt', 'hoodie', 'jacket', 'coat', 'sweater', 'dress', 'skirt', 'pants', 'shorts'] # specifies the suspect's top clothing type
     suspect_bottom_list = ['pants', 'shorts', 'jeans', 'plazos', 'bell bottoms'] # specifies the suspect's bottom clothing type
+    suspect_relationships_list = ['friend', 'older brother', 'younger brother', 'acquaintance', 'enemy'] # specifies the suspect's relationship with other suspects, if there exists one
 
     # dictionary to hold the different colors the suspect can be, according to their ethnicity
     suspect_skin_color_dict = {
@@ -28,7 +29,7 @@ class Suspects:
     suspect_motive_list = ['grudge', 'jealousy', 'revenge', 'resentment', 'family conflict', 'abuse history', 'business conflict', 'debt']
     
     # generate the suspects data, just like the case data
-    def generate_suspect_values(suspect_name, hair_color, height_type, blood_type, eye_color, ethnicity, skin_color, fingerprint_id, footprint_dimensions, suspect_states, motives, location_before_crime, location_during_crime, location_after_crime, suspect_top, suspect_bottom, suspect_top_color, suspect_bottom_color, save = True):
+    def generate_suspect_values(suspect_name, hair_color, height_type, blood_type, eye_color, ethnicity, skin_color, fingerprint_id, footprint_dimensions, suspect_states, motives, location_before_crime, location_during_crime, location_after_crime, suspect_top, suspect_bottom, suspect_top_color, suspect_bottom_color, relationships_between_suspects, save = True):
         # all the variables this functions needs to function - the lists and other derived values
         suspects_info = {
             'suspect names': suspect_name,
@@ -48,7 +49,8 @@ class Suspects:
             'top clothing': suspect_top,
             'bottom clothing': suspect_bottom,
             'top colors': suspect_top_color,
-            'bottom colors': suspect_bottom_color
+            'bottom colors': suspect_bottom_color,
+            'relationships between suspects': relationships_between_suspects
         }
         
         if save:
@@ -56,14 +58,14 @@ class Suspects:
             
         return suspects_info
     
-    def generate_suspect_report(suspect_number, suspect_name, hair_color, height_type, blood_type, eye_color, ethnicity, skin_color, motives, location_before_crime, location_during_crime, location_after_crime, suspect_top, suspect_bottom, suspect_top_color, suspect_bottom_color, save = True):
+    def generate_suspect_report(suspect_number, suspect_name, hair_color, height_type, blood_type, eye_color, ethnicity, skin_color, motives, location_before_crime, location_during_crime, location_after_crime, suspect_top, suspect_bottom, suspect_top_color, suspect_bottom_color, relationships_between_suspects, save = True):
         suspect_report_list = []
         
         for suspect in range(suspect_number):
             if motives[suspect] != None:
-                suspect_report = f'{suspect_name[suspect]} is a {hair_color[suspect]} haired {height_type[suspect]} individual\nwith a {blood_type[suspect]} blood group. Suspect is {skin_color[suspect]} toned, with {eye_color[suspect]} eyes and is {ethnicity[suspect]}. {suspect_name[suspect]} seems to\nhave some sort of a {motives[suspect]} with the victim. Their location was traced at {location_before_crime[suspect]} before the crime, at the {location_during_crime[suspect]} during the crime and at the {location_after_crime[suspect]} after the crime.\nSuspect was seen wearing a {suspect_top_color[suspect]} {suspect_top[suspect]} and {suspect_bottom_color[suspect]} {suspect_bottom[suspect]}.'
+                suspect_report = f'{suspect_name[suspect]} is a {hair_color[suspect]} haired {height_type[suspect]} individual\nwith a {blood_type[suspect]} blood group. Suspect is {skin_color[suspect]} toned, with {eye_color[suspect]} eyes and is {ethnicity[suspect]}. {suspect_name[suspect]} seems to\nhave some sort of a {motives[suspect]} with the victim. Their location was traced at {location_before_crime[suspect]} before the crime, at the {location_during_crime[suspect]} during the crime and at the {location_after_crime[suspect]} after the crime.\nSuspect was seen wearing a {suspect_top_color[suspect]} {suspect_top[suspect]} and {suspect_bottom_color[suspect]} {suspect_bottom[suspect]}.\nSuspect is {relationships_between_suspects[suspect_name[0]]} of {relationships_between_suspects[suspect_name[1]]}.'
             else:
-                suspect_report = f'{suspect_name[suspect]} is a {hair_color[suspect]} haired {height_type[suspect]} individual\nwith a {blood_type[suspect]} blood group. Suspect is {skin_color[suspect]} toned, with {eye_color[suspect]} eyes and is {ethnicity[suspect]}. {suspect_name[suspect]} does not seem to have any sort of a motive with the victim. Their location was traced at {location_before_crime[suspect]} before the crime, at the {location_during_crime[suspect]} during the crime and at the {location_after_crime[suspect]} after the crime.\nSuspect was seen wearing a {suspect_top_color[suspect]} {suspect_top[suspect]} and {suspect_bottom_color[suspect]} {suspect_bottom[suspect]}.'
+                suspect_report = f'{suspect_name[suspect]} is a {hair_color[suspect]} haired {height_type[suspect]} individual\nwith a {blood_type[suspect]} blood group. Suspect is {skin_color[suspect]} toned, with {eye_color[suspect]} eyes and is {ethnicity[suspect]}. {suspect_name[suspect]} does not seem to have any sort of a motive with the victim. Their location was traced at {location_before_crime[suspect]} before the crime, at the {location_during_crime[suspect]} during the crime and at the {location_after_crime[suspect]} after the crime.\nSuspect was seen wearing a {suspect_top_color[suspect]} {suspect_top[suspect]} and {suspect_bottom_color[suspect]} {suspect_bottom[suspect]}.\nSuspect is {relationships_between_suspects[suspect_name[0]]} of {relationships_between_suspects[suspect_name[1]]}.'
             
             suspect_report_list.append(suspect_report)
             
@@ -278,6 +280,35 @@ class Suspects:
         
         return bottom_list
 
+    def get_relationships_between_suspects(possible_relationships, suspect_number):
+        # opens the case data save file to get the suspect name list so that each culprit can be assigned a relationship to one of the other suspects, if there is a relationship between them
+        with open(SAVE_DIRECTORY / 'case data.json', 'r') as file:
+            case_data = json.load(file)
+
+        suspect_names = case_data['case details']['selected suspects'] # this list holds the names of the suspects in the case, which is used to assign relationships between them
+
+        suspect_relationships_bool_list = [] # this list holds the boolean values for whether a suspect has a relationship with another suspect
+        relationships_between_suspects_dict = {} # this dictionary holds the relationships between the suspects, if there is one
+
+        for i in range(suspect_number):
+            suspect_relationships_bool_list.append(random.choice([True, False])) # initializes the list with random boolean values for each suspect
+
+        for i in range(len(suspect_relationships_bool_list)):
+            relationships_between_suspects_dict[suspect_names[i]] = [None, None] # initializes the dictionary with the suspect names as keys and a list of two None values as the value, which will be used to store the relationship type and the other suspect's name
+
+        for i in range(len(suspect_relationships_bool_list)):
+            if suspect_relationships_bool_list[i] == True:
+                suspect_list_without_current_suspect = suspect_names.copy() # creates a copy of the suspect names list to remove the current suspect from, so that a random suspect can be chosen to have a relationship with the current suspect
+                suspect_list_without_current_suspect.remove(suspect_names[i]) # creates a list of suspects without the current suspect, to choose a random suspect to have a relationship with
+                relationships_between_suspects_dict[suspect_names[i]][0] = random.choice(possible_relationships) # assigns a random relationship type to the current suspect
+                relationships_between_suspects_dict[suspect_names[i]][1] = random.choice(suspect_list_without_current_suspect) # assigns a random suspect from the list of suspects without the current suspect to have a relationship with the current suspect
+            else:
+                relationships_between_suspects_dict[suspect_names[i]][0] = 'not an acquaintance' # assigns a default value to the relationship type for the current suspect if they do not have a relationship with another suspect
+                relationships_between_suspects_dict[suspect_names[i]][1] = 'anyone' # assigns 'anyone' to the other suspect's name for the current suspect if they do not have a relationship with another suspect
+
+        return relationships_between_suspects_dict
+
+
     # brings the two generate functions decalared above, from one function, which is declared below
     def generate_suspects_values_random():
         with open(SAVE_DIRECTORY / 'case data.json', 'r') as file:
@@ -303,8 +334,9 @@ class Suspects:
         selected_suspect_bottom = Suspects.get_suspect_bottom(Suspects.suspect_bottom_list, 5)
         selected_suspect_top_color = Suspects.get_suspect_clothing_color(Suspects.suspect_clothing_color_list, 5)
         selected_bottom_color = Suspects.get_suspect_clothing_color(Suspects.suspect_clothing_color_list, 5)
+        selected_relationships = Suspects.get_relationships_between_suspects(Suspects.suspect_relationships_list, 5)
         
-        Suspects.generate_suspect_values(suspect_names, selected_hair_colors, selected_height_types, selected_blood_types, selected_eye_color, selected_ethnicity, selected_skin_color, selected_fingerprint_id, selected_footprint_dimension, selected_states, selected_motives, selected_location_before_crime, selected_location_during_crime, selected_location_after_crime, selected_suspect_top, selected_suspect_bottom, selected_suspect_top_color, selected_bottom_color)
+        Suspects.generate_suspect_values(suspect_names, selected_hair_colors, selected_height_types, selected_blood_types, selected_eye_color, selected_ethnicity, selected_skin_color, selected_fingerprint_id, selected_footprint_dimension, selected_states, selected_motives, selected_location_before_crime, selected_location_during_crime, selected_location_after_crime, selected_suspect_top, selected_suspect_bottom, selected_suspect_top_color, selected_bottom_color, selected_relationships)
         
         
 class SuspectIllusion:
@@ -484,5 +516,6 @@ class SuspectIllusion:
         pulled_suspect_bottom = suspect_info.get('bottom clothing')
         pulled_suspect_top_color = suspect_info.get('top colors')
         pulled_suspect_bottom_color = suspect_info.get('bottom colors')
+        pulled_relationships_between_suspects = suspect_info.get('relationships between suspects')
         
-        Suspects.generate_suspect_report(5, pulled_suspect_names, pulled_hair_colors, pulled_height_types, pulled_blood_types, pulled_eye_colors, pulled_ethnicity, pulled_skin_color, pulled_motives, pulled_location_before_crime, pulled_location_during_crime, pulled_location_after_crime, pulled_suspect_top, pulled_suspect_bottom, pulled_suspect_top_color, pulled_suspect_bottom_color)
+        Suspects.generate_suspect_report(5, pulled_suspect_names, pulled_hair_colors, pulled_height_types, pulled_blood_types, pulled_eye_colors, pulled_ethnicity, pulled_skin_color, pulled_motives, pulled_location_before_crime, pulled_location_during_crime, pulled_location_after_crime, pulled_suspect_top, pulled_suspect_bottom, pulled_suspect_top_color, pulled_suspect_bottom_color, pulled_relationships_between_suspects)
