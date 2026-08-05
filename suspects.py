@@ -281,17 +281,18 @@ class Suspects:
         return bottom_list
 
     def get_relationships_between_suspects(possible_relationships, suspect_number):
+        suspect_relationships_bool_list = [] # this list holds the boolean values for whether a suspect has a relationship with another suspect
+        relationships_between_suspects_dict = {} # this dictionary holds the relationships between the suspects, if there is one
+        percentage = [False, False, False, False, False, False, True] # 
+        
         # opens the case data save file to get the suspect name list so that each culprit can be assigned a relationship to one of the other suspects, if there is a relationship between them
         with open(SAVE_DIRECTORY / 'case data.json', 'r') as file:
             case_data = json.load(file)
 
         suspect_names = case_data['case details']['selected suspects'] # this list holds the names of the suspects in the case, which is used to assign relationships between them
 
-        suspect_relationships_bool_list = [] # this list holds the boolean values for whether a suspect has a relationship with another suspect
-        relationships_between_suspects_dict = {} # this dictionary holds the relationships between the suspects, if there is one
-
         for i in range(suspect_number):
-            suspect_relationships_bool_list.append(random.choice([True, False])) # initializes the list with random boolean values for each suspect
+            suspect_relationships_bool_list.append(random.choice(percentage)) # initializes the list with random boolean values for each suspect
 
         for i in range(len(suspect_relationships_bool_list)):
             relationships_between_suspects_dict[suspect_names[i]] = [None, None] # initializes the dictionary with the suspect names as keys and a list of two None values as the value, which will be used to store the relationship type and the other suspect's name
@@ -304,7 +305,7 @@ class Suspects:
                 relationships_between_suspects_dict[suspect_names[i]][1] = random.choice(suspect_list_without_current_suspect) # assigns a random suspect from the list of suspects without the current suspect to have a relationship with the current suspect
             else:
                 relationships_between_suspects_dict[suspect_names[i]][0] = 'not an acquaintance' # assigns a default value to the relationship type for the current suspect if they do not have a relationship with another suspect
-                relationships_between_suspects_dict[suspect_names[i]][1] = 'anyone' # assigns 'anyone' to the other suspect's name for the current suspect if they do not have a relationship with another suspect
+                relationships_between_suspects_dict[suspect_names[i]][1] = 'any of the suspects' # assigns 'anyone' to the other suspect's name for the current suspect if they do not have a relationship with another suspect
 
         return relationships_between_suspects_dict
 
