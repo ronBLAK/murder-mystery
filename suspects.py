@@ -366,6 +366,7 @@ class SuspectIllusion:
     ethnicity = 'ethnicity'
     skin_color = 'skin colors'
     footprint_dimensions = 'footprint dimensions'
+    location_during_crime = 'location during crime'
     
     
     def read_case_data_save_file():
@@ -390,8 +391,9 @@ class SuspectIllusion:
         culprit_ethnicity = culprit_data['ethnicity']
         culprit_skin_color = culprit_data['skin color']
         culprit_footprint_dimensions = culprit_data['footprint dimensions']
+        culprit_location_during_crime = culprit_data['location during crime']
         
-        return culprit_name, culprit_hair_color, culprit_height_type, culprit_blood_type, culprit_eye_color, culprit_ethnicity, culprit_skin_color, culprit_footprint_dimensions
+        return culprit_name, culprit_hair_color, culprit_height_type, culprit_blood_type, culprit_eye_color, culprit_ethnicity, culprit_skin_color, culprit_footprint_dimensions, culprit_location_during_crime
     
     
     # this function is used for how many ever numbers is to be generated.. if we have 5 attribute lists for the suspects, then the suspects numebr that has the same detail as the culprit for each of those lists will be generated using this number of generator for each of those lists
@@ -426,9 +428,10 @@ class SuspectIllusion:
         suspect_ethnicities = suspect_data['ethnicity']
         suspect_skin_colors = suspect_data['skin colors']
         suspect_footprint_dimensions = suspect_data['footprint dimensions']
+        suspect_locations_during_crime = suspect_data['location during crime']
         
         # takes the values returned in the different read methods for the different save files required to exist for this class to run, and stores them in variables local to this functions
-        _, culprit_hair_color, culprit_height_type, culprit_blood_type, culprit_eye_color, culprit_ethnicity, culprit_skin_color, culprit_footprint_dimensions = SuspectIllusion.read_culprit_data_save_file()
+        _, culprit_hair_color, culprit_height_type, culprit_blood_type, culprit_eye_color, culprit_ethnicity, culprit_skin_color, culprit_footprint_dimensions, culprit_location_during_crime = SuspectIllusion.read_culprit_data_save_file()
         
         list_matcher = {
             'hair colors': {
@@ -464,6 +467,11 @@ class SuspectIllusion:
             'footprint dimensions': {
                 'suspect': suspect_footprint_dimensions,
                 'culprit': culprit_footprint_dimensions
+            },
+
+            'location during crime': {
+                'suspect': suspect_locations_during_crime,
+                'culprit': culprit_location_during_crime
             }
         }
         
@@ -491,6 +499,7 @@ class SuspectIllusion:
         number_of_indicies_to_swap_ethnicity = SuspectIllusion.get_culprit_attr_number_in_suspect_attr_list_to_change()
         number_of_indicies_to_swap_skin_color = SuspectIllusion.get_culprit_attr_number_in_suspect_attr_list_to_change()
         number_of_indices_to_swap_footprint_dimension = SuspectIllusion.get_culprit_attr_number_in_suspect_attr_list_to_change()
+        number_of_indices_to_swap_location_during_crime = SuspectIllusion.get_culprit_attr_number_in_suspect_attr_list_to_change()
 
         # generates the actual indices that needs to be contaminated, based on the number of indices that need to be contaminated - generated in the previous batch of generation
         indices_to_swap_hair_color = SuspectIllusion.get_suspects_attributes_indexes_to_change(number_of_indicies_to_swap_hair_color)
@@ -500,6 +509,7 @@ class SuspectIllusion:
         indices_to_swap_ethnicity = SuspectIllusion.get_suspects_attributes_indexes_to_change(number_of_indicies_to_swap_ethnicity)
         indices_to_swap_skin_color = SuspectIllusion.get_suspects_attributes_indexes_to_change(number_of_indicies_to_swap_skin_color)
         indices_to_swap_footprint_dimension = SuspectIllusion.get_suspects_attributes_indexes_to_change(number_of_indices_to_swap_footprint_dimension)
+        indices_to_swap_location_during_crime = SuspectIllusion.get_suspects_attributes_indexes_to_change(number_of_indices_to_swap_location_during_crime)
         
         # apply the distraction with the values generated just before - the number of indices and the actual idicies to swap within each attribute list
         SuspectIllusion.apply_distraction(SuspectIllusion.hair_color, indices_to_swap_hair_color)
@@ -509,6 +519,7 @@ class SuspectIllusion:
         SuspectIllusion.apply_distraction(SuspectIllusion.ethnicity, indices_to_swap_ethnicity)
         SuspectIllusion.apply_distraction(SuspectIllusion.skin_color, indices_to_swap_skin_color)
         SuspectIllusion.apply_distraction(SuspectIllusion.footprint_dimensions, indices_to_swap_footprint_dimension)
+        SuspectIllusion.apply_distraction(SuspectIllusion.location_during_crime, indices_to_swap_location_during_crime)
 
     def generate_suspect_report_random():
         suspects_report_values_file = 'suspects info.json'
