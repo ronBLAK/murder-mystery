@@ -1,5 +1,6 @@
 import random
 import json
+from save import Save
 from states import AlibiComponentStates
 from paths import SAVE_DIRECTORY
 
@@ -20,7 +21,7 @@ class AlibiFramework:
         AlibiComponentStates.LOCATION_AFTER_CRIME,
         AlibiComponentStates.CLOTHING_TOP,
         AlibiComponentStates.CLOTHING_BOTTOM,
-        AlibiComponentStates.OTHER_SUSPECT
+        AlibiComponentStates.RELATIONSHIP_WITH_OTHER_SUSPECTS
     ]
 
     # this function get the truth to lie proportion of each alibi
@@ -120,15 +121,57 @@ class AlibiFramework:
         return assigned_alibi_structures
 
 class Alibis:
-    def generate_alibi_data(suspect_number, alibi_components):
+    # this function will take in all the data derived in the alibi framework class to save that data into a save file
+    def generate_alibi_data(culprit_honesty, other_suspects_honesty, suspect_alibi_structures, final_alibi_data, save = True):
         # generates the alibi data for a given suspect number and alibi components
         alibi_data = {
-            'suspect number': suspect_number,
-            'alibi components': alibi_components
+            'alibi_framework_data_assigned': final_suspect_alibi_framework_data_dict,
+            'final alibi data': final_alibi_data
         }
-        
+
+        if save == True:
+            Save.save_alibi_data(alibi_data)
+
         return alibi_data
 
+    def generate_alibi_statements(final_suspect_alibi_data, save = True):
+       
+        if save == True:
+            Save.save_alibi_file(pass)
+
+    # this function retrieves the correct values from the save files for each of the component used in the alibi, based on the honesty flag
+    def get_final_values_for_alibi_from_framework(assigned_alibi_structures_and_honesty_values):
+        alibi_component_file_mapping_dict = {
+            'case data.json': [AlibiComponentStates.WEATHER],
+            'suspects info.json': [
+                AlibiComponentStates.LOCATION_BEFORE_CRIME,
+                AlibiComponentStates.LOCATION_DURING_CRIME,
+                AlibiComponentStates.LOCATION_AFTER_CRIME,
+                AlibiComponentStates.CLOTHING_TOP,
+                AlibiComponentStates.CLOTHING_BOTTOM,
+                AlibiComponentStates.RELATIONSHIP_WITH_VICTIM,
+            ]
+        }
+
+
+        # open the files where the data requried for the alibi resides in
+        with open(SAVE_DIRECTORY / 'case data.json', 'r') as json_file:
+            case_data = json.load(json_file)
+
+        with open(SAVE_DIRECTORY / 'suspects info.json', 'r') as json_file:
+            suspect_data = json.load(json_file)
+
+        with open(SAVE_DIRECTORY / 'witness data.json', 'r') as json_file:
+            witness_data = json.load(json_file)
+
+        suspects_final_alibi_component_values_dict = {}
+
+        # loops through all the keys inside the final dictionary that was returned in the frameworks class, and populates the new dictionary created in this function, in the same format, without the honesty key
+        for suspect in assigned_alibi_structures_and_honesty_values:
+            for honesty_flag in assigned_alibi_structures_and_honesty_values[suspect]['honesty']:
+                if honesty_flag == True:
+
+    def generate_alibis_random():
 
 
 
