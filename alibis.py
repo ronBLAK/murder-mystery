@@ -1,5 +1,7 @@
 import random
+import json
 from states import AlibiComponentStates
+from paths import SAVE_DIRECTORY
 
 class AlibiFramework:
     # list to store the crucial components of the case, which when lied about, will lead to the the cops being mislead - this list is manually populated
@@ -27,7 +29,7 @@ class AlibiFramework:
         culprit_honesty_proportion_list = [True] * number_of_truths_culprit + [False] * (alibi_component_count - number_of_truths_culprit) # determines the number of truths and lies the culprit will include in their alibi
         other_suspects_honesty_proportions_list_of_lists = [] # holds the list of each honesty structures for each of the suspects in each of the indices
 
-        for _ in range(suspect_number):
+        for _ in range(suspect_number - 1):
             number_of_truths_other_suspects = random.randint(6, 8) # holds a random number for how many truths in the other suspects alibi - the number of lies are derived from this value
             other_suspects_honesty_proportion_list = [True] * number_of_truths_other_suspects + [False] * (alibi_component_count - number_of_truths_other_suspects) # determines the number of truths and lies the other suspects will include in their alibis
             random.shuffle(other_suspects_honesty_proportion_list) # shuffles the bool list of each suspect (innocent)
@@ -62,8 +64,60 @@ class AlibiFramework:
 
             random.shuffle(suspect_alibi_structure_list_of_lists[i]) # shuffles each list differently
 
-        return general_suspect_alibi_structure_list, suspect_alibi_structure_list_of_lists
+        return suspect_alibi_structure_list_of_lists
 
+
+    # this function uses the boolean values list and the slibi structures that were generated to assign them to each of the suspect to be used for the actual alibi generation as a simple lookup table with the suspect name as the key, with all their data under their name key
+    def assign_structures_and_honesty_flags(culprit_honesty_flags_list, other_suspects_honesty_flags_list_of_lists, suspect_alibi_structure_list_of_lists):
+        alibi_structure_referencer = [] # creates an empty list to hold the alibi structures that have been used
+        other_suspects_honesty_flags_list_of_lists_referencer = [] # creates an empty list to hold the other suspects honesty proportions that have already been used
+
+        with open(SAVE_DIRECTORY / 'case data.json', 'r') as file:
+            case_data = json.load(file)
+
+        suspect_list = case_data['case details']['selected suspects'] # retrieves the suspect list
+        culprit_index = case_data['case details']['culprit index suspects list']
+
+        assigned_alibi_structures = {} # holds each of the structures, after assigned to the suspect, with the suspect name as the key to the assigned structure
+        
+        # loops through the suspect list and assigns one of the alibi structures to each of the suspect
+        for i in range(len(suspect_list)):
+            # adds the honesty list of the culprit for the culprit
+            if i == culprit_index:
+                assigned_alibi_structures[suspect_list[i]] = {
+                    'honesty': culprit_honesty_flags_list
+                }
+
+                random_alibi_structure = random.choice(suspect_alibi_structure_list_of_lists) # selects a random structure  
+
+                # this while loop makes sure that no alibi structure is used more than once
+                while random_alibi_structure in alibi_structure_referencer:
+                    random_alibi_structure = random.choice(suspect_alibi_structure_list_of_lists)
+
+                alibi_structure_referencer.append(random_alibi_structure) # updates the reference list with the newly selected alibi structure so that it is never selected again
+                assigned_alibi_structures[suspect_list[i]]['alibi structure'] = random_alibi_structure
+            else:
+                # this section makes sure each no suspect will have the same honesty list
+                random_honesty_proportion = random.choice(other_suspects_honesty_flags_list_of_lists)
+                while random_honesty_proportion in other_suspects_honesty_flags_list_of_lists_referencer:
+                    random_honesty_proportion = random.choice(other_suspects_honesty_flags_list_of_lists)
+
+                # this section makes sure that no suspect will have the same alibi structure
+                random_alibi_structure = random.choice(suspect_alibi_structure_list_of_lists)
+                while random_alibi_structure in alibi_structure_referencer:
+                    random_alibi_structure = random.choice(suspect_alibi_structure_list_of_lists)
+
+                # updates the reference lists once a new one has been selected
+                alibi_structure_referencer.append(random_alibi_structure)
+                other_suspects_honesty_flags_list_of_lists_referencer.append(random_honesty_proportion)
+
+                # creates the dictionary for the other suspects
+                assigned_alibi_structures[suspect_list[i]] = {
+                    'honesty': random_honesty_proportion,
+                    'alibi structure': random_alibi_structure
+                }
+
+        return assigned_alibi_structures
 
 class Alibis:
     def generate_alibi_data(suspect_number, alibi_components):
@@ -82,7 +136,8 @@ class Alibis:
 ####### FUNCTIONS TEST #######
 
 # culprit_honesty_proportions, other_suspects_honesty_proportions = AlibiFramework.get_truth_lie_proportions(5, 10)
-# general_alibi_structure, suspect_alibi_structure_each = AlibiFramework.get_alibi_structure(AlibiFramework.crucial_case_components, AlibiFramework.non_crucial_case_components, 5)
+# suspect_alibi_structure_each = AlibiFramework.get_alibi_structure(AlibiFramework.crucial_case_components, AlibiFramework.non_crucial_case_components, 5)
+# final_suspect_alibi_mapping = AlibiFramework.assign_structures_and_honesty_flags(culprit_honesty_proportions, other_suspects_honesty_proportions, suspect_alibi_structure_each)
 
 # print("------suspect alibi boolean structure------")
 # print(f"culprit honesty proportions: {culprit_honesty_proportions}")
@@ -90,10 +145,6 @@ class Alibis:
 # print(f"suspect 2 alibi proportions: {other_suspects_honesty_proportions[1]}")
 # print(f"suspect 3 alibi proportions: {other_suspects_honesty_proportions[2]}")
 # print(f"suspect 4 alibi proportions: {other_suspects_honesty_proportions[3]}")
-# print(f"suspect 5 alibi proportions: {other_suspects_honesty_proportions[4]}")
-# print("")
-# print("------suspect alibi structure general------")
-# print(f"general alibi structure: {general_alibi_structure}")
 # print("")
 # print("------suspect alibi structure each------")
 # print(f"alibi structure suspect 1: {suspect_alibi_structure_each[0]}")
@@ -101,3 +152,6 @@ class Alibis:
 # print(f"alibi structure suspect 3: {suspect_alibi_structure_each[2]}")
 # print(f"alibi structure suspect 4: {suspect_alibi_structure_each[3]}")
 # print(f"alibi structure suspect 5: {suspect_alibi_structure_each[4]}")
+# print("")
+# print(f"------assigned suspect alibi data------")
+# print(final_suspect_alibi_mapping)
