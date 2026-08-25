@@ -71,5 +71,6 @@ class AlibiComponentStates(Enum):
     LOCATION_AFTER_CRIME = 'location after crime'
     CLOTHING_TOP = 'top clothing'
     CLOTHING_BOTTOM = 'bottom clothing'
+    TOP_COLOR = 'top colors'
+    BOTTOM_COLOR = 'bottom colors'
     RELATIONSHIP_WITH_OTHER_SUSPECTS = 'relationships between suspects' # this determines whether any other suspects are mentioned in any of the alibis
-    # will try to not explicitly use color of top and bottom as they are part of the clothing, and not a separate alibi component - but if found that they both have to be separate states as well, will add them here later.

@@ -207,7 +207,7 @@ class Suspects:
             if i != SuspectStates.DUMMY.value and i != SuspectStates.OPPURTUNITY.value:
                 suspect_motive_list.append(random.choice(motives_list))
             else:
-                suspect_motive_list.append(None)
+                suspect_motive_list.append("nothing")
                 
         return suspect_motive_list, suspect_state_list
 

@@ -50,12 +50,14 @@ class AlibiFramework:
         all_components_list = crucial_components + non_crucial_components # this holds all the components that exists and can be picked for an alibi - it has been created so that items from both lists can be selected into the structure - the two separate lists come into play when thinking about who lies about what
         general_suspect_alibi_structure_list = [None] * 10 # this holds the alibi structure (the components that go in the alibi - the rest of the english is the same for the same component, and will be hardcoded, similar to the report). also this list is universal for each suspect - innocent suspects and culprits (all suspects will use this same list, but a different versio of it - each suspect will have a different order)
         suspect_alibi_structure_list_of_lists = [] # this holds each of the suspects alibi structure
+        # number_of_dressing_compoenents_selected = 0 # temporary variable to calculate indices to change tp accomodate all clothing components
 
         # this loop creates the inital alibi structure - the one that will be used for all the suspects, regardless of their innocence - it also makes sure that every component chosen is chosen only once
         for i in range(len(general_suspect_alibi_structure_list)):
             selected_component = random.choice(all_components_list)
             general_suspect_alibi_structure_list[i] = selected_component
             all_components_list.remove(selected_component)
+
 
         # this loop creates a new list for how many ever suspects there are, and adds them all to the master list, with each of the specific lists having 10 spots for each of the component selected
         for i in range(suspect_number):
@@ -72,7 +74,7 @@ class AlibiFramework:
 
 
     # this function uses the boolean values list and the slibi structures that were generated to assign them to each of the suspect to be used for the actual alibi generation as a simple lookup table with the suspect name as the key, with all their data under their name key
-    def assign_structures_and_honesty_flags(culprit_honesty_flags_list, other_suspects_honesty_flags_list_of_lists, suspect_alibi_structure_list_of_lists):
+    def assign_structures_and_honesty_flags(culprit_honesty_flags_list, other_suspects_honesty_flags_list_of_lists,  suspect_alibi_structure_list_of_lists):
         alibi_structure_referencer = [] # creates an empty list to hold the alibi structures that have been used
         other_suspects_honesty_flags_list_of_lists_referencer = [] # creates an empty list to hold the other suspects honesty proportions that have already been used
 
@@ -137,6 +139,7 @@ class Alibis:
     weather_list = Case.weather_list.copy()
     cloth_top_list = Suspects.suspect_top_list.copy()
     cloth_bottom_list = Suspects.suspect_bottom_list.copy()
+    cloth_color_list = Suspects.suspect_clothing_color_list.copy()
     relationship_with_other_suspect_list = Suspects.suspect_relationships_list.copy()
     suspect_names_list = Case.culprit_name_list.copy()
     ethnicity_list = Suspects.suspect_ethnicity_list.copy()
@@ -156,7 +159,7 @@ class Alibis:
         return alibi_data
 
     # this function retrieves the correct values from the save files for each of the component used in the alibi, based on the honesty flag
-    def get_final_values_for_alibi_from_framework(assigned_alibi_structures_and_honesty_values, location_before_crime, location_during_crime, location_after_crime, motives_list, blood_type_list, weather_list, cloth_top_list, cloth_bottom_list, relationship_with_other_suspects_list, ethnicity_list, suspect_names_list):
+    def get_final_values_for_alibi_from_framework(assigned_alibi_structures_and_honesty_values, location_before_crime, location_during_crime, location_after_crime, motives_list, blood_type_list, weather_list, cloth_top_list, cloth_bottom_list, cloth_color_list, relationship_with_other_suspects_list, ethnicity_list, suspect_names_list):
         # open the files where the data requried for the alibi resides in
         with open(SAVE_DIRECTORY / 'case data.json', 'r') as json_file:
             case_data = json.load(json_file)
@@ -173,6 +176,7 @@ class Alibis:
         weather_list_copy = []
         cloth_top_list_copy = []
         cloth_bottom_list_copy = []
+        cloth_color_list_copy = []
         relationship_with_other_suspect_list_copy = []
         suspect_names_list_copy = []
         ethnicity_list_copy = []
@@ -208,6 +212,18 @@ class Alibis:
                 'json load file': suspect_data,
                 'selection list': cloth_bottom_list,
                 'selection list copy': cloth_bottom_list_copy
+            },
+            AlibiComponentStates.TOP_COLOR: {
+                'indexed': True,
+                'json load file': suspect_data,
+                'selection list': cloth_color_list,
+                'selection list copy': cloth_color_list_copy
+            },
+            AlibiComponentStates.BOTTOM_COLOR: {
+                'indexed': True,
+                'json load file': suspect_data,
+                'selection list': cloth_color_list,
+                'selection list copy': cloth_color_list_copy
             },
             AlibiComponentStates.MURDER_MOTIVE: { 
                 'indexed': True,
@@ -261,6 +277,7 @@ class Alibis:
             weather_list_copy = Alibis.weather_list.copy()
             cloth_top_list_copy = Alibis.cloth_top_list.copy()
             cloth_bottom_list_copy = Alibis.cloth_bottom_list.copy()
+            cloth_color_list_copy = Alibis.cloth_color_list.copy()
             relationship_with_other_suspect_list_copy = Alibis.relationship_with_other_suspect_list.copy()
             suspect_names_list_copy = Alibis.suspect_names_list.copy()
             ethnicity_list_copy = Alibis.ethnicity_list.copy()
@@ -334,13 +351,179 @@ class Alibis:
 
         return suspects_final_alibi_component_values_dict
 
-    # def generate_alibi_statements(final_suspect_alibi_data, save = True):
-       
-    #     if save == True:
-    #         Save.save_alibi_file(pass)
+    def generate_alibi_statements(final_suspect_alibi_states_data, final_suspect_alibi_values, save = True):
+        alibi_statement_dict = {} # an empty dictionary to hold the actual alibi statements for each suspect, under their name as key
+        alibi_variable_mapping_dict = {} # this dictionary maps each of the alibi component states to its correct value that was retirieved and apssed into this function
 
-    # def generate_alibis_random():
+        with open(SAVE_DIRECTORY / 'victim data.json', 'r') as file:
+            victim_data = json.load(file)
 
+        # gets the victim data that would add more realism to the sentence structure
+        victim_name = victim_data['name']
+
+        # this loop iterates through the states final dict, and through each of the alibi components in each of the alibi structure of each of the suspects
+        for suspect in final_suspect_alibi_states_data:
+            alibi_variable_mapping_dict[suspect] = {} # this creates a key with the suspect name where the list alibi state list under each suspect from the main values list is stored
+
+            # this loop populates the variable mapping dictionary with the alibi states of each suspect ordered with the previous implementations of the list that has been passed into this function - compared to the previous population of the list, with the order being hardcoded to one order, completely destroying the order that was maintained throughout.
+            for state in final_suspect_alibi_states_data[suspect]['alibi structure']:
+                alibi_variable_mapping_dict[suspect][state] = {
+                    state.value: ''
+                }
+
+            for alibi_component in final_suspect_alibi_states_data[suspect]['alibi structure']:
+                alibi_component_index = final_suspect_alibi_states_data[suspect]['alibi structure'].index(alibi_component)
+
+                if alibi_component in alibi_variable_mapping_dict[suspect]:
+                    if alibi_component != AlibiComponentStates.RELATIONSHIP_TO_VICTIM and alibi_component != AlibiComponentStates.RELATIONSHIP_WITH_OTHER_SUSPECTS:
+                        alibi_variable_mapping_dict[suspect][alibi_component][alibi_component.value] = final_suspect_alibi_values[suspect][alibi_component_index] # assigns the value at the index of its parent state in the states dict to the correct dict value inside the variable mapping dictionary
+                    else:
+                        if alibi_component == AlibiComponentStates.RELATIONSHIP_WITH_OTHER_SUSPECTS:
+                            alibi_variable_mapping_dict[suspect][alibi_component][alibi_component.value] = f'{final_suspect_alibi_values[suspect][alibi_component_index][0]} of {final_suspect_alibi_values[suspect][alibi_component_index][1]}'
+                        elif alibi_component == AlibiComponentStates.RELATIONSHIP_TO_VICTIM:
+                            if final_suspect_alibi_values[suspect][alibi_component_index] == True:
+                                alibi_variable_mapping_dict[suspect][alibi_component][alibi_component.value] = 'know'
+                            else:
+                                alibi_variable_mapping_dict[suspect][alibi_component][alibi_component.value] = "don't know"
+                        else:
+                            pass # if i were to add another component that was not indexed, i would have to handle the case here
+
+            # this is the hardcoded dictionary of all the possible components
+            alibi_variable_mapping_dict_hardcoded = {
+                AlibiComponentStates.LOCATION_DURING_CRIME: {
+                    'location during crime': ''
+                },
+                AlibiComponentStates.MURDER_MOTIVE: {
+                    'suspect motives': ''
+                },
+                AlibiComponentStates.BLOOD_TYPE: {
+                    'blood types': ''
+                },
+                AlibiComponentStates.RELATIONSHIP_TO_VICTIM: {
+                    'suspect status': ''
+                },
+                AlibiComponentStates.WEATHER: {
+                    'weather': ''
+                },
+                AlibiComponentStates.LOCATION_BEFORE_CRIME: {
+                    'location before crime': ''
+                },
+                AlibiComponentStates.LOCATION_AFTER_CRIME: {
+                    'location after crime': ''
+                },
+                AlibiComponentStates.CLOTHING_TOP: {
+                    'top clothing': ''
+                },
+                AlibiComponentStates.CLOTHING_BOTTOM: {
+                    'bottom clothing': ''
+                },
+                AlibiComponentStates.TOP_COLOR: {
+                    'top colors': ''
+                },
+                AlibiComponentStates.BOTTOM_COLOR: {
+                    'bottom colors': ''
+                },
+                AlibiComponentStates.RELATIONSHIP_WITH_OTHER_SUSPECTS: {
+                    'relationships between suspects': ''
+                },
+                AlibiComponentStates.ETHNICITY: {
+                    'ethnicity': ''
+                }
+            }
+
+            if AlibiComponentStates.CLOTHING_TOP in alibi_variable_mapping_dict[suspect]:
+                alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.TOP_COLOR] = {
+                    AlibiComponentStates.TOP_COLOR.value: ''
+                }
+
+            if AlibiComponentStates.CLOTHING_BOTTOM in alibi_variable_mapping_dict[suspect]:
+                alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.BOTTOM_COLOR] = {
+                    AlibiComponentStates.BOTTOM_COLOR.value: ''
+                }
+
+            # this populates the harcoded lists with all the components for that suspect and keeps all other suspects as empty strings
+            for state in alibi_variable_mapping_dict_hardcoded:
+                if state in alibi_variable_mapping_dict[suspect]:
+                    alibi_variable_mapping_dict_hardcoded[state][state.value] += str(alibi_variable_mapping_dict[suspect][state][state.value])
+
+            # this function maps each of the states to its own custom sentence lists from sentences are randomly selected to go in the alibi statement
+            alibi_sentence_mapping_dict = {
+                AlibiComponentStates.LOCATION_DURING_CRIME: [
+                    f'I was at {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.LOCATION_DURING_CRIME]["location during crime"]} during the time you said the death occurred.',
+                    f'At the time of the murder, I was at the {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.LOCATION_DURING_CRIME]["location during crime"]}.',
+                    f'You can check — I was at the {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.LOCATION_DURING_CRIME]["location during crime"]} when all this happened.',
+                    f'I had nothing to do with this. I was at the {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.LOCATION_DURING_CRIME]["location during crime"]} the whole time.',
+                ],
+                AlibiComponentStates.MURDER_MOTIVE: [
+                    f'I did have {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.MURDER_MOTIVE]["suspect motives"]} towards {victim_name}, I won\'t lie about that.',
+                    f'Yes, there was {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.MURDER_MOTIVE]["suspect motives"]} between me and {victim_name}, and that does not make me a killer.',
+                ],
+                AlibiComponentStates.BLOOD_TYPE: [
+                    f'My blood group is {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.BLOOD_TYPE]["blood types"]}.',
+                    f'I am {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.BLOOD_TYPE]["blood types"]} blood group if that helps your investigation.',
+                    f'You can verify — my blood type is {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.BLOOD_TYPE]["blood types"]}.',
+                    f'I donated blood recently, they confirmed I am {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.BLOOD_TYPE]["blood types"]}.',
+                ],
+                AlibiComponentStates.RELATIONSHIP_TO_VICTIM: [
+                    f'I {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.RELATIONSHIP_TO_VICTIM]["suspect status"]} {victim_name}.',
+                    f'My relationship with {victim_name}? I {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.RELATIONSHIP_TO_VICTIM]["suspect status"]} them.',
+                    f'To be honest, I {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.RELATIONSHIP_TO_VICTIM]["suspect status"]} {victim_name}. Nothing more than that.',
+                    f'I will be straightforward — I {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.RELATIONSHIP_TO_VICTIM]["suspect status"]} {victim_name}.',
+                ],
+                AlibiComponentStates.WEATHER: [
+                    f'Yes. It was a really {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.WEATHER]["weather"]} day.',
+                    f'I remember it clearly — the weather was {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.WEATHER]["weather"]} that day.',
+                    f'It was {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.WEATHER]["weather"]} outside, I remember because it affected my plans.',
+                    f'The weather was {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.WEATHER]["weather"]} that day, hard to forget.',
+                ],
+                AlibiComponentStates.LOCATION_BEFORE_CRIME: [
+                    f'I was at {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.LOCATION_BEFORE_CRIME]["location before crime"]} before all of this happened.',
+                    f'Before the time of the murder, I was at the {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.LOCATION_BEFORE_CRIME]["location before crime"]}.',
+                    f'You can ask around — I was at the {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.LOCATION_BEFORE_CRIME]["location before crime"]} earlier that day.',
+                    f'Prior to the murder, my whereabouts were at the {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.LOCATION_BEFORE_CRIME]["location before crime"]}.',
+                ],
+                AlibiComponentStates.LOCATION_AFTER_CRIME: [
+                    f'After everything, I went straight to the {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.LOCATION_AFTER_CRIME]["location after crime"]}.',
+                    f'I was at the {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.LOCATION_AFTER_CRIME]["location after crime"]} after the time you mentioned.',
+                    f'Once I left, I headed to the {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.LOCATION_AFTER_CRIME]["location after crime"]}. You can verify that.',
+                    f'I spent my time at the {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.LOCATION_AFTER_CRIME]["location after crime"]} after that.',
+                ],
+                AlibiComponentStates.CLOTHING_TOP: [
+                    f'I was wearing a {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.TOP_COLOR]["top colors"]} {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.CLOTHING_TOP]["top clothing"]} that day.',
+                    f'That day I had on a {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.TOP_COLOR]["top colors"]} {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.CLOTHING_TOP]["top clothing"]}, I remember clearly.',
+                    f'You are asking what I wore? A {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.TOP_COLOR]["top colors"]} {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.CLOTHING_TOP]["top clothing"]} on top.',
+                    f'I distinctly remember wearing a {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.TOP_COLOR]["top colors"]} {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.CLOTHING_TOP]["top clothing"]} that day.',
+                ],
+                AlibiComponentStates.CLOTHING_BOTTOM: [
+                    f'I was wearing {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.BOTTOM_COLOR]["bottom colors"]} {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.CLOTHING_BOTTOM]["bottom clothing"]} that day.',
+                    f'On the bottom I had {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.BOTTOM_COLOR]["bottom colors"]} {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.CLOTHING_BOTTOM]["bottom clothing"]} on.',
+                    f'That day I wore {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.BOTTOM_COLOR]["bottom colors"]} {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.CLOTHING_BOTTOM]["bottom clothing"]}, nothing unusual.',
+                    f'I had {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.BOTTOM_COLOR]["bottom colors"]} {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.CLOTHING_BOTTOM]["bottom clothing"]} on, if that is what you are asking.',
+                ],
+                AlibiComponentStates.RELATIONSHIP_WITH_OTHER_SUSPECTS: [
+                    f'I am {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.RELATIONSHIP_WITH_OTHER_SUSPECTS]["relationships between suspects"]}.',
+                    f'If you must know, I am {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.RELATIONSHIP_WITH_OTHER_SUSPECTS]["relationships between suspects"]}.',
+                    f'My connection to the others? {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.RELATIONSHIP_WITH_OTHER_SUSPECTS]["relationships between suspects"]}.',
+                    f'I will be honest — I am {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.RELATIONSHIP_WITH_OTHER_SUSPECTS]["relationships between suspects"]}.',
+                ],
+                AlibiComponentStates.ETHNICITY: [
+                    f'I am {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.ETHNICITY]["ethnicity"]}.',
+                    f'For your records, I am {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.ETHNICITY]["ethnicity"]}.',
+                    f'My background? I am {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.ETHNICITY]["ethnicity"]}.',
+                    f'I am of {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.ETHNICITY]["ethnicity"]} descent.',
+                ],
+            }
+
+            alibi_statement_dict[suspect] = '' # initialize the main dict with a string for the suspect
+
+            for state in alibi_variable_mapping_dict[suspect]:
+                if state in alibi_sentence_mapping_dict:
+                    alibi_statement_dict[suspect] += random.choice(alibi_sentence_mapping_dict[state])
+
+        # if save == True:
+        #     Save.save_alibi_file(alibi_statement_dict)
+
+        return alibi_statement_dict
 
 
 
@@ -349,7 +532,8 @@ class Alibis:
 culprit_honesty_proportions, other_suspects_honesty_proportions = AlibiFramework.get_truth_lie_proportions(5, 10)
 suspect_alibi_structure_each = AlibiFramework.get_alibi_structure(AlibiFramework.crucial_case_components, AlibiFramework.non_crucial_case_components, 5)
 final_suspect_alibi_mapping = AlibiFramework.assign_structures_and_honesty_flags(culprit_honesty_proportions, other_suspects_honesty_proportions, suspect_alibi_structure_each)
-final_suspect_alibi_values = Alibis.get_final_values_for_alibi_from_framework(final_suspect_alibi_mapping, Alibis.location_before_crime_list, Alibis.location_during_crime_list, Alibis.location_after_crime_list, Alibis.murder_motive_list, Alibis.blood_type_list, Alibis.weather_list, Alibis.cloth_top_list, Alibis.cloth_bottom_list, Alibis.relationship_with_other_suspect_list, Alibis.ethnicity_list, Alibis.suspect_names_list)
+final_suspect_alibi_values = Alibis.get_final_values_for_alibi_from_framework(final_suspect_alibi_mapping, Alibis.location_before_crime_list, Alibis.location_during_crime_list, Alibis.location_after_crime_list, Alibis.murder_motive_list, Alibis.blood_type_list, Alibis.weather_list, Alibis.cloth_top_list, Alibis.cloth_bottom_list, Alibis.cloth_bottom_list, Alibis.relationship_with_other_suspect_list, Alibis.ethnicity_list, Alibis.suspect_names_list)
+final_suspect_alibi_statements = Alibis.generate_alibi_statements(final_suspect_alibi_mapping, final_suspect_alibi_values)
 
 print("------suspect alibi boolean structure------")
 print(f"culprit honesty proportions: {culprit_honesty_proportions}")
@@ -370,3 +554,6 @@ print(final_suspect_alibi_mapping)
 print("")
 print("------alibi structure with actual values------")
 print(final_suspect_alibi_values)
+print("")
+print("------alibi statements------")
+print(final_suspect_alibi_statements)
