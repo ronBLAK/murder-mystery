@@ -466,7 +466,7 @@ class Alibis:
                 ],
                 AlibiComponentStates.RELATIONSHIP_TO_VICTIM: [
                     f'I {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.RELATIONSHIP_TO_VICTIM]["suspect status"]} {victim_name}.',
-                    f'My relationship with {victim_name}? I {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.RELATIONSHIP_TO_VICTIM]["suspect status"]} them.',
+                    f'My relationship with {victim_name}? I mean I {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.RELATIONSHIP_TO_VICTIM]["suspect status"]} them.',
                     f'To be honest, I {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.RELATIONSHIP_TO_VICTIM]["suspect status"]} {victim_name}. Nothing more than that.',
                     f'I will be straightforward — I {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.RELATIONSHIP_TO_VICTIM]["suspect status"]} {victim_name}.',
                 ],
@@ -486,7 +486,7 @@ class Alibis:
                     f'After everything, I went straight to the {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.LOCATION_AFTER_CRIME]["location after crime"]}.',
                     f'I was at the {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.LOCATION_AFTER_CRIME]["location after crime"]} after the time you mentioned.',
                     f'Once I left, I headed to the {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.LOCATION_AFTER_CRIME]["location after crime"]}. You can verify that.',
-                    f'I spent my time at the {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.LOCATION_AFTER_CRIME]["location after crime"]} after that.',
+                    f'I spent my time at the {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.LOCATION_AFTER_CRIME]["location after crime"]} after the time you mentioned.',
                 ],
                 AlibiComponentStates.CLOTHING_TOP: [
                     f'I was wearing a {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.TOP_COLOR]["top colors"]} {alibi_variable_mapping_dict_hardcoded[AlibiComponentStates.CLOTHING_TOP]["top clothing"]} that day.',
@@ -535,6 +535,7 @@ final_suspect_alibi_mapping = AlibiFramework.assign_structures_and_honesty_flags
 final_suspect_alibi_values = Alibis.get_final_values_for_alibi_from_framework(final_suspect_alibi_mapping, Alibis.location_before_crime_list, Alibis.location_during_crime_list, Alibis.location_after_crime_list, Alibis.murder_motive_list, Alibis.blood_type_list, Alibis.weather_list, Alibis.cloth_top_list, Alibis.cloth_bottom_list, Alibis.cloth_bottom_list, Alibis.relationship_with_other_suspect_list, Alibis.ethnicity_list, Alibis.suspect_names_list)
 final_suspect_alibi_statements = Alibis.generate_alibi_statements(final_suspect_alibi_mapping, final_suspect_alibi_values)
 
+print("-------------------------------------------")
 print("------suspect alibi boolean structure------")
 print(f"culprit honesty proportions: {culprit_honesty_proportions}")
 print(f"suspect 1 alibi proportions: {other_suspects_honesty_proportions[0]}")
@@ -549,11 +550,14 @@ print(f"alibi structure suspect 3: {suspect_alibi_structure_each[2]}")
 print(f"alibi structure suspect 4: {suspect_alibi_structure_each[3]}")
 print(f"alibi structure suspect 5: {suspect_alibi_structure_each[4]}")
 print("")
-print(f"------assigned suspect alibi data------")
+print("------assigned suspect alibi data------")
 print(final_suspect_alibi_mapping)
 print("")
 print("------alibi structure with actual values------")
 print(final_suspect_alibi_values)
 print("")
 print("------alibi statements------")
-print(final_suspect_alibi_statements)
+for suspect in final_suspect_alibi_statements:
+    print(f"{suspect}: {final_suspect_alibi_statements[suspect]}")
+    print("")
+print("-------------------------------------------")
