@@ -129,6 +129,65 @@ class AlibiFramework:
 
         return assigned_alibi_structures
 
+    # this function takes in the assigned alibi structures and honesty proportions, and modifies the boolean list of each suspect based on whether they are a culprit or normal suspect, and whether they are meant to be lying about a given component or not
+    def control_honesty_proportions(assigned_alibi_structures, crucial_case_components):
+        crucial_components_indices = [] # this list holds the indices of the boolean list or the component list, if components that a given suspect is allowed to lie about
+        other_components_indices = [] # this list holds all other indices that are opposite to what is held in the previous - all indices that were not collected in the previous list goes here
+
+        # open the case data
+        with open(SAVE_DIRECTORY / 'case data.json', 'r') as json_file:
+            case_data = json.load(json_file)
+
+        culprit_index = case_data['case details']['culprit index suspects list']
+
+        # loop through the assinged structures and honesty flags, assigning index of suspect in the original list to each suspect in this dictionary
+        for i, suspect in enumerate(assigned_alibi_structures):
+            suspect_component_list = assigned_alibi_structures[suspect]['alibi structure'] # for easy access to the component list of the suspect being iterated over
+            suspect_boolean_list = assigned_alibi_structures[suspect]['honesty'] # for easy access to the honesty values of the suspect being iterated over
+
+            if i == culprit_index: # this is the logic for honesty manipulation if the suspect being iterated over is the culprit
+                # reset the index save lists
+                crucial_components_indices.clear()
+                other_components_indices.clear()
+
+                for j in range(len(suspect_component_list)): # loops through the component list of the suspect being iterated over
+                    if suspect_component_list[j] in crucial_case_components:
+                        crucial_components_indices.append(j) # flags the index of the component in this iteration as allowed for the suspect on current iteration to lie about
+                    else:
+                        other_components_indices.append(j) # any index that does not go in the previous list gets caught here - implemented for more precise control over iteration of components conditionally
+
+                # this is the loop that manages the flip and counterflip of elements so that the culprit lies are implemented, while maintaining the previously selected proportions
+                for k in crucial_components_indices: # loops through all the indices that with elements that can be lied about for culprit
+                    if suspect_boolean_list[k] == True:
+                        counter_flip_component_index = random.choice(other_components_indices)
+
+                        suspect_boolean_list[k] = False # flips the honesty if it is a component that can give the culprit away easily
+                        suspect_boolean_list[counter_flip_component_index] = True # makes a counter flip on the element that was flipped to retain the proportion of truths to lies
+                        other_components_indices.remove(counter_flip_component_index) # removes the already counter flipped element so that its flag can never be changed again in another iteration - also to keep the proportions intact
+            else: # this is the honesty manipulation logic for any normal suspect
+                # reset the index save lists
+                crucial_components_indices.clear()
+                other_components_indices.clear()
+
+                for j in range(len(suspect_component_list)): # loops through the component list of the suspect being iterated over
+                    if suspect_component_list[j] in crucial_case_components:
+                        crucial_components_indices.append(j) # flags the index of the component in this iteration as allowed for the suspect on current iteration to lie about
+                    else:
+                        other_components_indices.append(j) # any index that does not go in the previous list gets caught here - implemented for more precise control over iteration of components conditionally
+
+                # this is the loop that manages the flip and counterflip of elements so that the culprit lies are implemented, while maintaining the previously selected proportions
+                for k in crucial_components_indices: # loops through all the indices that with elements that can be lied about for culprit
+                    if suspect_boolean_list[k] == False:
+                        counter_flip_component_index = random.choice(other_components_indices)
+
+                        suspect_boolean_list[k] = True # flips the honesty if it is a component that can give the culprit away easily
+                        suspect_boolean_list[counter_flip_component_index] = False # makes a counter flip on the element that was flipped to retain the proportion of truths to lies
+                        other_components_indices.remove(counter_flip_component_index) # removes the already counter flipped element so that its flag can never be changed again in another iteration - also to keep the proportions intact
+
+        return assigned_alibi_structures # returns the new assigned alibi structures with the controlled honesty
+
+
+
 class Alibis:
     # these are all the lists that would be required reconstruct the alibis component list with the actual values in place of the states
     location_before_crime_list = Suspects.suspect_location_list.copy()
@@ -371,6 +430,7 @@ class Alibis:
                     state.value: ''
                 }
 
+            # this loop populates the internal variable mapping dict based on the file mapping dict, pulling necessary values from specified files
             for alibi_component in final_suspect_alibi_states_data[suspect]['alibi structure']:
                 alibi_component_index = final_suspect_alibi_states_data[suspect]['alibi structure'].index(alibi_component)
 
@@ -416,12 +476,6 @@ class Alibis:
                 },
                 AlibiComponentStates.CLOTHING_BOTTOM: {
                     'bottom clothing': ''
-                },
-                AlibiComponentStates.TOP_COLOR: {
-                    'top colors': ''
-                },
-                AlibiComponentStates.BOTTOM_COLOR: {
-                    'bottom colors': ''
                 },
                 AlibiComponentStates.RELATIONSHIP_WITH_OTHER_SUSPECTS: {
                     'relationships between suspects': ''
@@ -523,6 +577,7 @@ class Alibis:
         # if save == True:
         #     Save.save_alibi_file(alibi_statement_dict)
 
+        print(alibi_variable_mapping_dict_hardcoded)
         return alibi_statement_dict
 
 
@@ -531,33 +586,33 @@ class Alibis:
 
 culprit_honesty_proportions, other_suspects_honesty_proportions = AlibiFramework.get_truth_lie_proportions(5, 10)
 suspect_alibi_structure_each = AlibiFramework.get_alibi_structure(AlibiFramework.crucial_case_components, AlibiFramework.non_crucial_case_components, 5)
-final_suspect_alibi_mapping = AlibiFramework.assign_structures_and_honesty_flags(culprit_honesty_proportions, other_suspects_honesty_proportions, suspect_alibi_structure_each)
-final_suspect_alibi_values = Alibis.get_final_values_for_alibi_from_framework(final_suspect_alibi_mapping, Alibis.location_before_crime_list, Alibis.location_during_crime_list, Alibis.location_after_crime_list, Alibis.murder_motive_list, Alibis.blood_type_list, Alibis.weather_list, Alibis.cloth_top_list, Alibis.cloth_bottom_list, Alibis.cloth_bottom_list, Alibis.relationship_with_other_suspect_list, Alibis.ethnicity_list, Alibis.suspect_names_list)
+suspect_alibi_mapping = AlibiFramework.assign_structures_and_honesty_flags(culprit_honesty_proportions, other_suspects_honesty_proportions, suspect_alibi_structure_each)
+final_suspect_alibi_mapping = AlibiFramework.control_honesty_proportions(suspect_alibi_mapping, AlibiFramework.crucial_case_components)
+final_suspect_alibi_values = Alibis.get_final_values_for_alibi_from_framework(final_suspect_alibi_mapping, Alibis.location_before_crime_list, Alibis.location_during_crime_list, Alibis.location_after_crime_list, Alibis.murder_motive_list, Alibis.blood_type_list, Alibis.weather_list, Alibis.cloth_top_list, Alibis.cloth_bottom_list, Alibis.cloth_color_list, Alibis.relationship_with_other_suspect_list, Alibis.ethnicity_list, Alibis.suspect_names_list)
 final_suspect_alibi_statements = Alibis.generate_alibi_statements(final_suspect_alibi_mapping, final_suspect_alibi_values)
 
 print("-------------------------------------------")
-print("------suspect alibi boolean structure------")
-print(f"culprit honesty proportions: {culprit_honesty_proportions}")
-print(f"suspect 1 alibi proportions: {other_suspects_honesty_proportions[0]}")
-print(f"suspect 2 alibi proportions: {other_suspects_honesty_proportions[1]}")
-print(f"suspect 3 alibi proportions: {other_suspects_honesty_proportions[2]}")
-print(f"suspect 4 alibi proportions: {other_suspects_honesty_proportions[3]}")
-print("")
-print("------suspect alibi structure each------")
-print(f"alibi structure suspect 1: {suspect_alibi_structure_each[0]}")
-print(f"alibi structure suspect 2: {suspect_alibi_structure_each[1]}")
-print(f"alibi structure suspect 3: {suspect_alibi_structure_each[2]}")
-print(f"alibi structure suspect 4: {suspect_alibi_structure_each[3]}")
-print(f"alibi structure suspect 5: {suspect_alibi_structure_each[4]}")
-print("")
-print("------assigned suspect alibi data------")
-print(final_suspect_alibi_mapping)
-print("")
-print("------alibi structure with actual values------")
-print(final_suspect_alibi_values)
-print("")
+# print("------suspect alibi boolean structure------")
+# print(f"culprit honesty proportions: {culprit_honesty_proportions}")
+# print(f"suspect 1 alibi proportions: {other_suspects_honesty_proportions[0]}")
+# print(f"suspect 2 alibi proportions: {other_suspects_honesty_proportions[1]}")
+# print(f"suspect 3 alibi proportions: {other_suspects_honesty_proportions[2]}")
+# print(f"suspect 4 alibi proportions: {other_suspects_honesty_proportions[3]}")
+# print("")
+# print("------suspect alibi structure each------")
+# print(f"alibi structure suspect 1: {suspect_alibi_structure_each[0]}")
+# print(f"alibi structure suspect 2: {suspect_alibi_structure_each[1]}")
+# print(f"alibi structure suspect 3: {suspect_alibi_structure_each[2]}")
+# print(f"alibi structure suspect 4: {suspect_alibi_structure_each[3]}")
+# print(f"alibi structure suspect 5: {suspect_alibi_structure_each[4]}")
+# print("")
+# print("------assigned suspect alibi data------")
+# print(final_suspect_alibi_mapping)
+# print("")
+# print("------alibi structure with actual values------")
+# print(final_suspect_alibi_values)
+# print("")
 print("------alibi statements------")
 for suspect in final_suspect_alibi_statements:
     print(f"{suspect}: {final_suspect_alibi_statements[suspect]}")
-    print("")
-print("-------------------------------------------")
+    print("-------------------------------------------")
