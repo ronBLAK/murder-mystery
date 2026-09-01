@@ -12,8 +12,8 @@ class Suspects:
     suspect_ethnicity_list = ['Asian', 'Indian', 'African', 'American', 'European'] # specifies the suspect's ethnicity
     suspect_location_list = ['home', 'work', 'school', 'gym', 'bar', 'restaurant', 'park', 'shopping mall', 'beach', 'park'] # specifies the suspect's location before the crime
     suspect_clothing_color_list = ['black', 'white', 'red', 'blue', 'green', 'yellow', 'orange', 'purple', 'brown', 'grey'] # specifies the suspect's clothing color
-    suspect_top_list = ['t-shirt', 'shirt', 'hoodie', 'jacket', 'coat', 'sweater', 'dress', 'skirt', 'pants', 'shorts'] # specifies the suspect's top clothing type
-    suspect_bottom_list = ['pants', 'shorts', 'jeans', 'plazos', 'bell bottoms'] # specifies the suspect's bottom clothing type
+    suspect_top_list = ['t-shirt', 'shirt', 'hoodie', 'jacket', 'coat', 'sweater', 'dress'] # specifies the suspect's top clothing type
+    suspect_bottom_list = ['pants', 'shorts', 'jeans', 'plazos', 'bell bottoms', 'skirts'] # specifies the suspect's bottom clothing type
     suspect_relationships_list = ['friend', 'acquaintance', 'enemy'] # specifies the suspect's relationship with other suspects, if there exists one
 
     # dictionary to hold the different colors the suspect can be, according to their ethnicity

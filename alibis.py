@@ -1,5 +1,6 @@
 import random
 import json
+import copy
 from save import Save
 from states import AlibiComponentStates, SuspectStates
 from paths import SAVE_DIRECTORY
@@ -9,6 +10,7 @@ from case import Case
 
 class AlibiFramework:
     # list to store the crucial components of the case, which when lied about, will lead to the the cops being mislead - this list is manually populated
+    # NOTE: THIS LIST SHOULD ALWAYS BE SMALLER THAN THE NON CRUCIAL LIST BY AT LEAST ONE ELEMENT
     crucial_case_components = [
         AlibiComponentStates.LOCATION_DURING_CRIME,
         AlibiComponentStates.MURDER_MOTIVE,
@@ -42,7 +44,11 @@ class AlibiFramework:
 
         random.shuffle(culprit_honesty_proportion_list) # shuffles the culprit honesty proportions list
 
-        return culprit_honesty_proportion_list, other_suspects_honesty_proportions_list_of_lists
+        # copies the existing bool lists to new lists
+        culprit_copy = culprit_honesty_proportion_list.copy()
+        other_suspects_copy = copy.deepcopy(other_suspects_honesty_proportions_list_of_lists)
+
+        return culprit_honesty_proportion_list, other_suspects_honesty_proportions_list_of_lists, culprit_copy, other_suspects_copy
     
 
     # this function generates the different components that will actually go in the alibis
@@ -74,7 +80,7 @@ class AlibiFramework:
 
 
     # this function uses the boolean values list and the slibi structures that were generated to assign them to each of the suspect to be used for the actual alibi generation as a simple lookup table with the suspect name as the key, with all their data under their name key
-    def assign_structures_and_honesty_flags(culprit_honesty_flags_list, other_suspects_honesty_flags_list_of_lists,  suspect_alibi_structure_list_of_lists):
+    def assign_structures_and_honesty_flags(culprit_honesty_flags_list, culprit_honesty_flags_list_copy, other_suspects_honesty_flags_list_of_lists, other_suspects_honesty_flags_list_of_lists_copy, suspect_alibi_structure_list_of_lists):
         alibi_structure_referencer = [] # creates an empty list to hold the alibi structures that have been used
         other_suspects_honesty_flags_list_of_lists_referencer = [] # creates an empty list to hold the other suspects honesty proportions that have already been used
 
@@ -91,7 +97,8 @@ class AlibiFramework:
             # adds the honesty list of the culprit for the culprit
             if i == culprit_index:
                 assigned_alibi_structures[suspect_list[i]] = {
-                    'honesty': culprit_honesty_flags_list
+                    'honesty': culprit_honesty_flags_list,
+                    'honesty copy': culprit_honesty_flags_list_copy
                 }
 
                 random_alibi_structure = random.choice(suspect_alibi_structure_list_of_lists) # selects a random structure
@@ -110,7 +117,8 @@ class AlibiFramework:
 
                 # creates the dictionary for the other suspects
                 assigned_alibi_structures[suspect_list[i]] = {
-                    'honesty': random_honesty_proportion
+                    'honesty': random_honesty_proportion,
+                    'honesty copy': other_suspects_honesty_flags_list_of_lists_copy[other_suspects_honesty_flags_list_of_lists.index(random_honesty_proportion)]
                 }
 
                 # updates the honesty reference lists
@@ -144,6 +152,7 @@ class AlibiFramework:
         for i, suspect in enumerate(assigned_alibi_structures):
             suspect_component_list = assigned_alibi_structures[suspect]['alibi structure'] # for easy access to the component list of the suspect being iterated over
             suspect_boolean_list = assigned_alibi_structures[suspect]['honesty'] # for easy access to the honesty values of the suspect being iterated over
+            suspect_boolean_list_copy = assigned_alibi_structures[suspect]['honesty copy'] # for easy access to the honesty values copy of the suspect being iterated over
 
             if i == culprit_index: # this is the logic for honesty manipulation if the suspect being iterated over is the culprit
                 # reset the index save lists
@@ -161,8 +170,14 @@ class AlibiFramework:
                     if suspect_boolean_list[k] == True:
                         counter_flip_component_index = random.choice(other_components_indices)
 
+                        # makes the flip and the counterflip for the main boolean list
                         suspect_boolean_list[k] = False # flips the honesty if it is a component that can give the culprit away easily
                         suspect_boolean_list[counter_flip_component_index] = True # makes a counter flip on the element that was flipped to retain the proportion of truths to lies
+
+                        # makes the flip and the counterflip for the copy boolean list
+                        suspect_boolean_list_copy[k] = False # flips the honesty if it is a component that can give the culprit away easily
+                        suspect_boolean_list_copy[counter_flip_component_index] = True # makes a counter flip on the element that was flipped to retain the proportion of truths to lies
+
                         other_components_indices.remove(counter_flip_component_index) # removes the already counter flipped element so that its flag can never be changed again in another iteration - also to keep the proportions intact
             else: # this is the honesty manipulation logic for any normal suspect
                 # reset the index save lists
@@ -180,8 +195,14 @@ class AlibiFramework:
                     if suspect_boolean_list[k] == False:
                         counter_flip_component_index = random.choice(other_components_indices)
 
+                        # makes the flip and the counterflip for the main boolean list
                         suspect_boolean_list[k] = True # flips the honesty if it is a component that can give the culprit away easily
                         suspect_boolean_list[counter_flip_component_index] = False # makes a counter flip on the element that was flipped to retain the proportion of truths to lies
+
+                        # makes the flip and the counterflip for the copy boolean list
+                        suspect_boolean_list_copy[k] = False # flips the honesty if it is a component that can give the culprit away easily
+                        suspect_boolean_list_copy[counter_flip_component_index] = True # makes a counter flip on the element that was flipped to retain the proportion of truths to lies
+
                         other_components_indices.remove(counter_flip_component_index) # removes the already counter flipped element so that its flag can never be changed again in another iteration - also to keep the proportions intact
 
         return assigned_alibi_structures # returns the new assigned alibi structures with the controlled honesty
@@ -217,7 +238,7 @@ class Alibis:
         return alibi_data
 
     # this function retrieves the correct values from the save files for each of the component used in the alibi, based on the honesty flag
-    def get_final_values_for_alibi_from_framework(assigned_alibi_structures_and_honesty_values, location_before_crime, location_during_crime, location_after_crime, motives_list, blood_type_list, weather_list, cloth_top_list, cloth_bottom_list, relationship_with_other_suspects_list, ethnicity_list, suspect_names_list):
+    def get_final_values_for_alibi_from_framework(assigned_alibi_structures_and_honesty_values, location_before_crime, location_during_crime, location_after_crime, motives_list, blood_type_list, weather_list, cloth_top_list, cloth_bottom_list, ethnicity_list, suspect_names_list):
         # open the files where the data requried for the alibi resides in
         with open(SAVE_DIRECTORY / 'case data.json', 'r') as json_file:
             case_data = json.load(json_file)
@@ -563,3 +584,16 @@ class Alibis:
 
 
         return alibi_statement_dict
+
+
+
+culprit_hon, other_suspects_hon, culprit_hon_copy, other_suspects_hon_copy = AlibiFramework.get_truth_lie_proportions(5, 10)
+alibi_structure_list = AlibiFramework.get_alibi_structure(AlibiFramework.crucial_case_components, AlibiFramework.non_crucial_case_components, 5)
+structures_assigned = AlibiFramework.assign_structures_and_honesty_flags(culprit_hon, culprit_hon_copy, other_suspects_hon, other_suspects_hon_copy, alibi_structure_list)
+structures_assigned_final = AlibiFramework.control_honesty_proportions(structures_assigned, AlibiFramework.crucial_case_components)
+final_values = Alibis.get_final_values_for_alibi_from_framework(structures_assigned_final, Alibis.location_before_crime_list, Alibis.location_during_crime_list, Alibis.location_after_crime_list, Alibis.murder_motive_list, Alibis.blood_type_list, Alibis.weather_list, Alibis.cloth_top_list, Alibis.cloth_bottom_list, Alibis.ethnicity_list, Alibis.suspect_names_list)
+statements = Alibis.generate_alibi_statements(structures_assigned_final, final_values)
+
+print(structures_assigned_final)
+print("")
+print(final_values)
