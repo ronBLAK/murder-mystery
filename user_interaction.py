@@ -13,19 +13,11 @@ from states import ClueStates, NoteStates
 from paths import SAVE_DIRECTORY
 
 class CluesUI:
-    def read_clue_data():
-        # opens the clue data save file (clue data.json)
-        with open(SAVE_DIRECTORY / 'clue data.json', 'r') as json_file:
-            clue_data = json.load(json_file)
-                
-        selected_clues_framework = clue_data['clues framework']
-        selected_clues = clue_data['final clues']
-        
-        return selected_clues_framework, selected_clues
+    
     
     # this function works to print the the text description of what kind of clues they can inspect - player is only shown and allowed to inspect clues and items that are selected as clues
     def commands():
-        selected_clues_framework, selected_clues = CluesUI.read_clue_data() # reads the clue data save file every single time the ui is run
+        selected_clues_framework, selected_clues = Clues.read_clue_data() # reads the clue data save file every single time the ui is run
         
         # this is the dictionary that maps the clue to the text that is displayed on the screen for the user to interact with
         clue_to_user_text_mapping_dict = {
@@ -52,7 +44,7 @@ class CluesUI:
     
     # defines all the actions available to the user in the clues ui nav            
     def clues_ui(user_choice):
-        selected_clues_framework, selected_clues = CluesUI.read_clue_data() # reads the clue data save file every single time the ui is run
+        selected_clues_framework, selected_clues = Clues.read_clue_data() # reads the clue data save file every single time the ui is run
         
         # this is the dictionary that maps out the command to the clue that the command controls
         clues_command_mapping_dict = {

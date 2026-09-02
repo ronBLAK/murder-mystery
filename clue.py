@@ -361,6 +361,16 @@ class Clues:
             Save.save_clue_data(clue_data)
             
         return clue_data
+
+    def read_clue_data():
+        # opens the clue data save file (clue data.json)
+        with open(SAVE_DIRECTORY / 'clue data.json', 'r') as json_file:
+            clue_data = json.load(json_file)
+                
+        selected_clues_framework = clue_data['clues framework']
+        selected_clues = clue_data['final clues']
+        
+        return selected_clues_framework, selected_clues
     
     # need to change this so that visibilty affects the actual final clue list, and not the clue types.
     # this flags whether the detetcive can see a certain clue or not - this was changed from the clue frameworks class because it is required here and not there - plus, when it was created there, accessing it from this class is impossible without extensive, unnecessary means
