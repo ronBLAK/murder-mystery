@@ -10,6 +10,7 @@ from witnesses import Witnesses
 from detective import Detective
 from detective_attributes import DetectiveAttributes
 from victim import Victim
+from alibis import Alibis
 #import notebook
 
 # gets and stores all information of detective from save file for detective and assigns it to variables to be used in main.py
@@ -26,6 +27,8 @@ witness_data_file_path = SAVE_DIRECTORY / 'witness data.json'
 witness_report_file_path = SAVE_DIRECTORY / 'witness file.json'
 culprit_data_file_path = SAVE_DIRECTORY / 'culprit data.json'
 victim_data_file_path = SAVE_DIRECTORY / 'victim data.json'
+clue_data_file_path = SAVE_DIRECTORY / 'clue data.json'
+alibi_data_file_path = SAVE_DIRECTORY / 'alibi data.json'
 
 print("you have been transferred to the detective wing of the police department.")
 print("")
@@ -37,7 +40,7 @@ detective_name = Detective.detective_name()
 print('')
 
 # The main flow of the game based on whether the save files exist
-if os.path.exists(case_file_file_path) and os.path.exists(case_data_file_path) and os.path.exists(detective_data_file_path) and os.path.exists(suspects_info_file_path) and os.path.exists(suspect_report_file_path) and os.path.exists(witness_data_file_path) and os.path.exists(witness_report_file_path) and os.path.exists(culprit_data_file_path) and os.path.exists(victim_data_file_path):
+if os.path.exists(case_file_file_path) and os.path.exists(case_data_file_path) and os.path.exists(detective_data_file_path) and os.path.exists(suspects_info_file_path) and os.path.exists(suspect_report_file_path) and os.path.exists(witness_data_file_path) and os.path.exists(witness_report_file_path) and os.path.exists(culprit_data_file_path) and os.path.exists(victim_data_file_path) and os.path.exists(clue_data_file_path) and os.path.exists(alibi_data_file_path):
     if detective_name == Detective.read_detective_info():
         print(f'Hello {detective_name}. Let\'s pick up your case right where you left it off.')
         print('')
@@ -81,6 +84,7 @@ if os.path.exists(case_file_file_path) and os.path.exists(case_data_file_path) a
         SuspectIllusion.generate_suspect_report_random() # Generates the suspect report based on the new set of values for the suspect attributes, and saves the report to a save file  
         Victim.generate_victim_data_random() # Generates random information for the victim - names are generated with the case, and not from within the victim class
         Clues.generate_clues_random() # Generates the different clues clues are generated procedurally, using states, and not just whatever is in the case data, culprit data and suspect data
+        Alibis.generate_alibis_random() # Generates random alibis for each of the suspects
         
 
         # Checks and validates the input
@@ -94,6 +98,7 @@ if os.path.exists(case_file_file_path) and os.path.exists(case_data_file_path) a
             SuspectIllusion.generate_suspect_report_random()
             Victim.generate_victim_data_random()
             Clues.generate_clues_random()
+            Alibis.generate_alibis_random()
 
         # This is what happens if the user selects the given case instead of generating a new case
         print('Case selected')
@@ -134,6 +139,7 @@ else:
     SuspectIllusion.generate_suspect_report_random() # Generates the suspect report based on the new set of values for the suspect attributes, and saves the report to a save file
     Victim.generate_victim_data_random() # Generates random information for the victim - names are generated with the case, and not from within the victim class
     Clues.generate_clues_random() # Generates the different clues clues are generated procedurally, using states, and not just whatever is in the case data, culprit data and suspect data
+    Alibis.generate_alibis_random() # Generates random alibis for each of the suspects
 
     # Checks and validates the input
     while MainUI.question_start_solve() != '1':
@@ -146,6 +152,7 @@ else:
         SuspectIllusion.generate_suspect_report_random()
         Victim.generate_victim_data_random()
         Clues.generate_clues_random()
+        Alibis.generate_alibis_random()
 
     # This is what happens if the user selects the given case instead of generating a new case
     print('Case selected')

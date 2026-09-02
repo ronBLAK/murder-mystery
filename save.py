@@ -85,10 +85,3 @@ class Save:
         
         with open(file_path, 'w') as json_file:
             json.dump(alibi_data, json_file, indent= 4)
-
-    # used to save the final alibi file - the complete file for each suspect (this can be read in pure english logical sentences) - from the methods defined later in the suspects class, used with this method
-    def save_alibi_file(alibi_file):
-        file_path = SAVE_DIRECTORY / 'alibi file.json'
-        
-        with open(file_path, 'w') as json_file:
-            json.dump(alibi_file, json_file, indent= 4)

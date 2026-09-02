@@ -308,6 +308,12 @@ class Suspects:
                     if j in suspect_list_without_current_suspect:
                         suspect_list_without_current_suspect.remove(j)
 
+                if not suspect_list_without_current_suspect:
+                    # No available suspect to form a relationship with. Treat this suspect as having no relationship.
+                    relationships_between_suspects_dict[suspect_names[i]][0] = 'not an acquaintance'
+                    relationships_between_suspects_dict[suspect_names[i]][1] = 'any of the suspects'
+                    continue
+
                 random_not_current_suspect = random.choice(suspect_list_without_current_suspect)
                 relationships_between_suspects_dict[suspect_names[i]][0] = random.choice(possible_relationships) # assigns a random relationship type to the current suspect
                 relationships_between_suspects_dict[suspect_names[i]][1] = random_not_current_suspect # assigns a random suspect from the list of suspects without the current suspect to have a relationship with the current suspect

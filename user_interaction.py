@@ -5,6 +5,9 @@ from suspects import Suspects
 from witnesses import Witnesses
 from detective import Detective
 from detective_attributes import DetectiveAttributes
+from clue import Clues
+from victim import Victim
+from alibis import Alibis
 
 from states import ClueStates, NoteStates
 from paths import SAVE_DIRECTORY
@@ -143,6 +146,7 @@ class MainUI:
         print('5. open solve and submit menu')
         print('6. view suspect information')
         print('7. view witness list for crime')
+        print('8. view suspect alibis')
         print('')
         
     # defines all actions available to detective in investigator menu, and their criteria - this version handles user input when the data is being generated - i.e. for the first time a case is loaded - this is the function that loads the values for the case
@@ -218,6 +222,16 @@ class MainUI:
             print('')
             time.sleep(2)
             MainUI.commands()
+        elif user_choice == '8':
+            print("You can view all the suspects' alibis here")
+            print('')
+            print('')
+
+            suspect_alibis = Alibis.read_alibis()
+
+            for alibi in suspect_alibis:
+                print(alibi)
+                print('')
         else:
             print('invalid input. please try again..')
             print('')
