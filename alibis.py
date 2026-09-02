@@ -238,13 +238,26 @@ class Alibis:
         return alibi_data
 
     # this function retrieves the correct values from the save files for each of the component used in the alibi, based on the honesty flag
-    def get_final_values_for_alibi_from_framework(assigned_alibi_structures_and_honesty_values, location_before_crime, location_during_crime, location_after_crime, motives_list, blood_type_list, weather_list, cloth_top_list, cloth_bottom_list, ethnicity_list, suspect_names_list):
+    def get_final_values_for_alibi_from_framework(assigned_alibi_structures_and_honesty_values, location_before_crime_list, location_during_crime_list, location_after_crime_list, motives_list, blood_type_list, weather_list, relationship_with_other_suspect_list, cloth_top_list, cloth_bottom_list, ethnicity_list, suspect_names_list):
         # open the files where the data requried for the alibi resides in
         with open(SAVE_DIRECTORY / 'case data.json', 'r') as json_file:
             case_data = json.load(json_file)
             
         with open(SAVE_DIRECTORY / 'suspects info.json', 'r') as json_file:
             suspect_data = json.load(json_file)
+
+        suspect_list_case = suspect_data['suspect names'] # retrieve the suspect list for the case
+        name_removal_list = [] # temporary list to store values that remove unrelated values
+
+        # adds all names from the selection pool that are not part of the case to the removal list
+        for suspect in suspect_names_list:
+            if suspect not in suspect_list_case:
+                name_removal_list.append(suspect)
+
+        # remove the unwanted names from the selection list
+        for suspect in name_removal_list:
+            if suspect in suspect_names_list:
+                suspect_names_list.remove(suspect)
 
         # creates empty lists that will will later be copies of the same lists from the different classes they are initialised in
         location_before_crime_list_copy = []
@@ -264,19 +277,19 @@ class Alibis:
             AlibiComponentStates.LOCATION_BEFORE_CRIME: {
                 'indexed': True,
                 'json load file': suspect_data,
-                'selection list': location_before_crime,
+                'selection list': location_before_crime_list,
                 'selection list copy': location_before_crime_list_copy
             },
             AlibiComponentStates.LOCATION_DURING_CRIME: {
                 'indexed': True,
                 'json load file': suspect_data,
-                'selection list': location_during_crime,
+                'selection list': location_during_crime_list,
                 'selection list copy': location_during_crime_list_copy
             },
             AlibiComponentStates.LOCATION_AFTER_CRIME: {
                 'indexed': True,
                 'json load file': suspect_data,
-                'selection list': location_after_crime,
+                'selection list': location_after_crime_list,
                 'selection list copy': location_after_crime_list_copy
             },
             AlibiComponentStates.CLOTHING_TOP: {
@@ -335,17 +348,17 @@ class Alibis:
             suspects_final_alibi_component_values_dict[suspect] = [] # creates a list at the suspect name currently being iterated over
 
             # creates copies of all the imported lists within the for loop so that each item can be iterated over separately, without including the item being iterated over
-            location_before_crime_list_copy = Alibis.location_before_crime_list.copy()
-            location_during_crime_list_copy = Alibis.location_during_crime_list.copy()
-            location_after_crime_list_copy = Alibis.location_after_crime_list.copy()
-            murder_motive_list_copy = Alibis.murder_motive_list.copy()
-            blood_type_list_copy = Alibis.blood_type_list.copy()
-            weather_list_copy = Alibis.weather_list.copy()
-            cloth_top_list_copy = Alibis.cloth_top_list.copy()
-            cloth_bottom_list_copy = Alibis.cloth_bottom_list.copy()
-            relationship_with_other_suspect_list_copy = Alibis.relationship_with_other_suspect_list.copy()
-            suspect_names_list_copy = Alibis.suspect_names_list.copy()
-            ethnicity_list_copy = Alibis.ethnicity_list.copy()
+            location_before_crime_list_copy = location_before_crime_list.copy()
+            location_during_crime_list_copy = location_during_crime_list.copy()
+            location_after_crime_list_copy = location_after_crime_list.copy()
+            murder_motive_list_copy = motives_list.copy()
+            blood_type_list_copy = blood_type_list.copy()
+            weather_list_copy = weather_list.copy()
+            cloth_top_list_copy = cloth_top_list.copy()
+            cloth_bottom_list_copy = cloth_bottom_list.copy()
+            relationship_with_other_suspect_list_copy = relationship_with_other_suspect_list.copy()
+            suspect_names_list_copy = suspect_names_list.copy()
+            ethnicity_list_copy = ethnicity_list.copy()
 
 
             for honesty_flag in assigned_alibi_structures_and_honesty_values[suspect]['honesty']:
@@ -584,16 +597,4 @@ class Alibis:
 
 
         return alibi_statement_dict
-
-
-
-culprit_hon, other_suspects_hon, culprit_hon_copy, other_suspects_hon_copy = AlibiFramework.get_truth_lie_proportions(5, 10)
-alibi_structure_list = AlibiFramework.get_alibi_structure(AlibiFramework.crucial_case_components, AlibiFramework.non_crucial_case_components, 5)
-structures_assigned = AlibiFramework.assign_structures_and_honesty_flags(culprit_hon, culprit_hon_copy, other_suspects_hon, other_suspects_hon_copy, alibi_structure_list)
-structures_assigned_final = AlibiFramework.control_honesty_proportions(structures_assigned, AlibiFramework.crucial_case_components)
-final_values = Alibis.get_final_values_for_alibi_from_framework(structures_assigned_final, Alibis.location_before_crime_list, Alibis.location_during_crime_list, Alibis.location_after_crime_list, Alibis.murder_motive_list, Alibis.blood_type_list, Alibis.weather_list, Alibis.cloth_top_list, Alibis.cloth_bottom_list, Alibis.ethnicity_list, Alibis.suspect_names_list)
-statements = Alibis.generate_alibi_statements(structures_assigned_final, final_values)
-
-print(structures_assigned_final)
-print("")
-print(final_values)
+    
