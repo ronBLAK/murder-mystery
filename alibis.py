@@ -190,7 +190,7 @@ class AlibiFramework:
                     else:
                         other_components_indices.append(j) # any index that does not go in the previous list gets caught here - implemented for more precise control over iteration of components conditionally
 
-                # this is the loop that manages the flip and counterflip of elements so that the culprit lies are implemented, while maintaining the previously selected proportions
+                # this is the loop that manages the flip and counterflip of elements so that the innocent's lies are implemented, while maintaining the previously selected proportions
                 for k in crucial_components_indices: # loops through all the indices that with elements that can be lied about for culprit
                     if suspect_boolean_list[k] == False:
                         counter_flip_component_index = random.choice(other_components_indices)
@@ -200,8 +200,8 @@ class AlibiFramework:
                         suspect_boolean_list[counter_flip_component_index] = False # makes a counter flip on the element that was flipped to retain the proportion of truths to lies
 
                         # makes the flip and the counterflip for the copy boolean list
-                        suspect_boolean_list_copy[k] = False # flips the honesty if it is a component that can give the culprit away easily
-                        suspect_boolean_list_copy[counter_flip_component_index] = True # makes a counter flip on the element that was flipped to retain the proportion of truths to lies
+                        suspect_boolean_list_copy[k] = True # flips the honesty if it is a component that can give the culprit away easily
+                        suspect_boolean_list_copy[counter_flip_component_index] = False # makes a counter flip on the element that was flipped to retain the proportion of truths to lies
 
                         other_components_indices.remove(counter_flip_component_index) # removes the already counter flipped element so that its flag can never be changed again in another iteration - also to keep the proportions intact
 
