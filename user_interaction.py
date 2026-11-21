@@ -224,6 +224,10 @@ class MainUI:
             for alibi in suspect_alibis:
                 print(alibi)
                 print('')
+
+            print('')
+            time.sleep(2)
+            MainUI.commands()
         else:
             print('invalid input. please try again..')
             print('')
