@@ -168,7 +168,8 @@ class AlibiFramework:
                 # this is the loop that manages the flip and counterflip of elements so that the culprit lies are implemented, while maintaining the previously selected proportions
                 for k in crucial_components_indices: # loops through all the indices that with elements that can be lied about for culprit
                     if suspect_boolean_list[k] == True:
-                        counter_flip_component_index = random.choice(other_components_indices)
+                        candidates = [idx for idx in other_components_indices if suspect_boolean_list[idx] == False] # this list comprehension creates a list of all the indices that are not crucial, and have a False value in the boolean list - this is to ensure that the counterflip is always on an element that is not crucial, and is a lie, so that the proportion of truths to lies is maintained
+                        counter_flip_component_index = random.choice(candidates)
 
                         # makes the flip and the counterflip for the main boolean list
                         suspect_boolean_list[k] = False # flips the honesty if it is a component that can give the culprit away easily
@@ -193,7 +194,8 @@ class AlibiFramework:
                 # this is the loop that manages the flip and counterflip of elements so that the innocent's lies are implemented, while maintaining the previously selected proportions
                 for k in crucial_components_indices: # loops through all the indices that with elements that can be lied about for culprit
                     if suspect_boolean_list[k] == False:
-                        counter_flip_component_index = random.choice(other_components_indices)
+                        candidates = [idx for idx in other_components_indices if suspect_boolean_list[idx] == True] # this list comprehension creates a list of all the indices that are not crucial, and have a True value in the boolean list - this is to ensure that the counterflip is always on an element that is not crucial, and is a truth, so that the proportion of truths to lies is maintained
+                        counter_flip_component_index = random.choice(candidates)
 
                         # makes the flip and the counterflip for the main boolean list
                         suspect_boolean_list[k] = True # flips the honesty if it is a component that can give the culprit away easily
