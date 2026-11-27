@@ -72,3 +72,29 @@ class AlibiComponentStates(Enum):
     CLOTHING_TOP = 'top clothing'
     CLOTHING_BOTTOM = 'bottom clothing'
     RELATIONSHIP_WITH_OTHER_SUSPECTS = 'relationships between suspects' # this determines whether any other suspects are mentioned in any of the alibis
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class OppurtunityEvidenceStates(Enum):
+    LOCATION_DURING_CRIME = 'location during crime'
+    FINGERPRINTS = 'fingerprint ID'
+    BLOOD = 'blood type'
+    HAIR = 'hair color'
+    FOOTPRINTS = 'footprint dimensions'
+
+class MotiveEvidenceStates(Enum):
+    MURDER_MOTIVE = 'suspect motives'
+
+class SpecialEvidenceStates(Enum):
+    LIE = 'lie' # special case for a reason to accuse - cannot be classified under oppurutunity or motive - comes under alibi - will define after i get an idea on how to look at that
