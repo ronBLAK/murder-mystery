@@ -8,13 +8,12 @@ from detective_attributes import DetectiveAttributes
 from clue import Clues
 from victim import Victim
 from alibis import Alibis
+from submit import Submit
 
 from states import ClueStates, NoteStates
 from paths import SAVE_DIRECTORY
 
 class CluesUI:
-    
-    
     # this function works to print the the text description of what kind of clues they can inspect - player is only shown and allowed to inspect clues and items that are selected as clues
     def commands():
         selected_clues_framework, selected_clues = Clues.read_clue_data() # reads the clue data save file every single time the ui is run
@@ -115,6 +114,91 @@ class CluesUI:
                 CluesUI.clues_ui(user_menu_choice)
                 print('')
                     
+
+class SolveSubmitUI:
+    # this functions shows what kind of evidences they can use from the entire pool of information to support their accusation
+    def commands():
+        print('1. LOCATION DURING CRIME')
+        print('2. FINGERPRINTS')
+        print('3. BLOOD')
+        print('4. HAIR')
+        print('5. FOOTPRINTS')
+
+        print('6. MOTIVE')
+
+        print('7. LIES')
+
+    # this function defines the entire flow of the solve and submit ui - it is a loop that allows the user to submit their accusation with relevant required evidence, and check if they are correct or not
+    def submit_ui():
+        SolveSubmitUI.commands() # prints the commands for the user to select from
+        print('')
+
+        # this runs till the user selects the required number of evidences to support their accusation - 3 for oppurtunity and 1 for motive
+        while True:
+            # this is the input that the user gives to select the evidences they want to use to support their accusation
+            user_choices = input("from the above list of evidences, please select 3 pieces of evidences that proves the suspect's oppurtunity to commit the crime, and 1 piece of evidence that proves the suspect's motive to commit the crime. Enter the number corresponding to the evidences you want to use, separated by commas. For example, if you want to use LOCATION DURING CRIME, FINGERPRINTS, BLOOD, and MOTIVE, you would enter '1,2,3,6'. PLEASE NOTE THAT YOU MUST SELECT EXACTLY 4 EVIDENCES.")
+            selected_evidences_int_v1 = user_choices.split(',') # splits the user input into a list of selected evidences
+
+            # this checks if all are numbers between 1 and 7, and converts each element into integer types if valid
+            if all(choice.isdigit() and 1 <= int(choice) <= 7 for choice in selected_evidences_int_v1):
+                selected_evidences_int = [int(item) for item in selected_evidences_int_v1] # converts the list of strings to a list of integers
+            else:
+                print('invalid input. try again and enter only numbers between 1 and 7, separated by commas.')
+                continue # if the user input is invalid, the loop continues to ask for input again
+
+            if len(selected_evidences_int_v1) == 4:
+                break
+            else:
+                print('invalid input. please try again. you must select exactly 4 evidences')
+                continue # if the user input is invalid, the loop continues to ask for input again
+
+        print('--REQUIRED FIELDS ARE MARKED WITH AN ASTERISK (*)--')
+        print('')
+        accused = input('name of the accused culprit (*) --> ') # asks the user to input the name of the accused culprit
+
+        # holds a serial number that will count the oppurtunity and motive evidences, separately. this means that no matter what order the user has selected the evidences, that order that the user selected is maintained, without having a default number for the selections, which goes mismatched if the user enters the selctions in a different order that in the commands list
+        serial_num_opp = 0
+        serial_num_mot = 0
+
+        # this loop asks the user the information for the evidence that they have selected - asks the user for only the evidence they have selected to use, entered in the previous question when they entered the relevant numbers in csv format
+        for i in range(len(selected_evidences_int)):
+            match i:
+                case 1:
+                    serial_num_opp += 1
+                    location_evidence = input(f'OPPURTUNITY EVD {serial_num_opp}: suspect location during crime (*) --> ')
+                case 2:
+                    serial_num_opp += 1
+                    fingerprint_id_evidence = input(f'OPPURTUNITY EVD {serial_num_opp}: suspect fingerprint ID (*) --> ')
+                case 3:
+                    serial_num_opp += 1
+                    blood_type_evidence = input(f'OPPURTUNITY EVD {serial_num_opp}: suspect blood type (*) --> ')
+                case 4:
+                    serial_num_opp += 1
+                    hair_color_evidence = input(f'OPPURTUNITY EVD {serial_num_opp}: suspect hair color (*) --> ')
+                case 5:
+                    serial_num_opp += 1
+                    footprint_dimensions_evidence = input(f'OPPURTUNITY EVD {serial_num_opp}: suspect footprint dimensions (*) --> ')
+                case 6:
+                    serial_num_mot += 1
+                    murder_motive_evidence = input(f'MOTIVE EVD {serial_num_mot}: suspect murder motive (*) --> ')
+
+        # this is the dictionary that maps out the command to the clue that the command controls
+        evidence_command_mapping_dict = {
+            1: location_evidence,
+            2: fingerprint_id_evidence,
+            3: blood_type_evidence,
+            4: hair_color_evidence,
+            5: footprint_dimensions_evidence,
+            6: murder_motive_evidence
+        }
+
+        selected_evidences = [] # initialises a list to hold the actual evidences selected, corresponding to the numbers selected by the user
+        
+        # this for loop goes through the list of selected evidences, and appends the actual evidence to the list of selected evidences
+        for i in selected_evidences_int:
+            if i in evidence_command_mapping_dict:
+                selected_evidences.append(evidence_command_mapping_dict[i]) # appends the actual evidence to the list of selected evidences
+
 
 class MainUI:
     # whether the user accepts or declines the case
