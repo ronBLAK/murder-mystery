@@ -133,6 +133,23 @@ class SolveSubmitUI:
         SolveSubmitUI.commands() # prints the commands for the user to select from
         print('')
 
+        # this dictionary holds the different evidence states, mapped to their commands
+        # going to be used to see if the user selects any evidence that is not part of the case (example would be them selecting a clue that does not exist in the case, and logically cannot be used to incriminate the suspect, as it doesnt exist in this case)
+        evidence_command_mapping_dict = {
+            1: Submit.oppurtunity_evidences[0].value,
+            2: Submit.oppurtunity_evidences[1].value,
+            3: Submit.oppurtunity_evidences[2].value,
+            4: Submit.oppurtunity_evidences[3].value,
+            5: Submit.oppurtunity_evidences[4].value,
+            6: Submit.motive_evidences[0].value
+        }
+
+        # opens the clue data.json file to access the clues that exist in this case
+        with open(SAVE_DIRECTORY / 'clue data.json', 'r') as json_file:
+            clue_data = json.load(json_file)
+
+        clues = clue_data['clues framework'] # gets the list of clues that exist in this case
+
         # this runs till the user selects the required number of evidences to support their accusation - 3 for oppurtunity and 1 for motive
         while True:
             # this is the input that the user gives to select the evidences they want to use to support their accusation
@@ -140,29 +157,48 @@ class SolveSubmitUI:
             selected_evidences_int_v1 = user_choices.split(',') # splits the user input into a list of selected evidences
 
             # this checks if all are numbers between 1 and 7, and converts each element into integer types if valid
-            if all(choice.isdigit() and 1 <= int(choice) <= 7 for choice in selected_evidences_int_v1):
+            if all(choice.isdigit() and 1 <= int(choice) <= 6 for choice in selected_evidences_int_v1):
                 selected_evidences_int = [int(item) for item in selected_evidences_int_v1] # converts the list of strings to a list of integers
             else:
                 print('invalid input. try again and enter only numbers between 1 and 7, separated by commas.')
                 continue # if the user input is invalid, the loop continues to ask for input again
 
-            if len(selected_evidences_int_v1) == 4:
-                break
-            else:
+            # this for block and the next if block work together to make sure the user cannot select evidences that dont exist in the case universe
+            non_existent_clues = [] # this is a list of clues that the user selected which cannot be submitted as it does not exist in the case
+            # populates the is_clue list with true or false based on the selected evidence's clue status
+            for i in selected_evidences_int:
+                if i in evidence_command_mapping_dict:
+                    if evidence_command_mapping_dict[i] in ClueStates and evidence_command_mapping_dict[i] not in clues:
+                        non_existent_clues.append(i)
+
+            if len(non_existent_clues) != 0:
+                print(f'{len(non_existent_clues)} pieces of evidence you submitted cannot incriminate the suspect, as it cannot as it cannot link the suspect to the crime. they are: ')
+
+                for i in non_existent_clues:
+                    print(f'\t-> {evidence_command_mapping_dict[i]}')
+                    
+                continue # if the user selects any non existent pieces of evidence, the entire response is invalidated and loop continues to ask for input again
+
+            if len(selected_evidences_int_v1) != 4:
                 print('invalid input. please try again. you must select exactly 4 evidences')
                 continue # if the user input is invalid, the loop continues to ask for input again
+            else:
+                break
 
         print('--REQUIRED FIELDS ARE MARKED WITH AN ASTERISK (*)--')
         print('')
+
+        # ------NAME OF ACCUSED------
         accused = input('name of the accused culprit (*) --> ') # asks the user to input the name of the accused culprit
 
+        # ------EVIDENCE TO SUBMIT------
         # holds a serial number that will count the oppurtunity and motive evidences, separately. this means that no matter what order the user has selected the evidences, that order that the user selected is maintained, without having a default number for the selections, which goes mismatched if the user enters the selctions in a different order that in the commands list
         serial_num_opp = 0
         serial_num_mot = 0
 
         # this loop asks the user the information for the evidence that they have selected - asks the user for only the evidence they have selected to use, entered in the previous question when they entered the relevant numbers in csv format
-        for i in range(len(selected_evidences_int)):
-            match i:
+        for evidence_command in selected_evidences_int:
+            match evidence_command:
                 case 1:
                     serial_num_opp += 1
                     location_evidence = input(f'OPPURTUNITY EVD {serial_num_opp}: suspect location during crime (*) --> ')
@@ -183,7 +219,7 @@ class SolveSubmitUI:
                     murder_motive_evidence = input(f'MOTIVE EVD {serial_num_mot}: suspect murder motive (*) --> ')
 
         # this is the dictionary that maps out the command to the clue that the command controls
-        evidence_command_mapping_dict = {
+        variable_command_mapping_dict = {
             1: location_evidence,
             2: fingerprint_id_evidence,
             3: blood_type_evidence,
@@ -196,8 +232,29 @@ class SolveSubmitUI:
         
         # this for loop goes through the list of selected evidences, and appends the actual evidence to the list of selected evidences
         for i in selected_evidences_int:
-            if i in evidence_command_mapping_dict:
-                selected_evidences.append(evidence_command_mapping_dict[i]) # appends the actual evidence to the list of selected evidences
+            if i in variable_command_mapping_dict:
+                selected_evidences.append(variable_command_mapping_dict[i]) # appends the actual evidence to the list of selected evidences
+
+        # ------ANY LIES SPOTTED------
+        lie_count = (int)(input('how many incriminating lies did you catch the suspect saying. ENTER THE CORRECT NUMBER OF LIES YOU FOUND. FAILURE TO FILL ANY OF THE FIELDS WILL INVALIDATE ALL PREVIOUSLY SUBMITTED LIED (simply press enter if you found none) -->'))
+        serial_num_lie = 0
+
+        # sets the lies spotted to if the user does not enter anything
+        if lie_count == '':
+            lie_count = 0
+
+        lie_truth_mapping_dict = {} # this dictionary holds the lie-truth pair of every single lie the user spots, all entered manually by the user
+
+        for i in range(lie_count):
+            serial_num_lie += 1 # increments the serial counter
+
+            # asks the user for the lie they spotted and its actual truth, serializing it as it goes
+            lie = input(f'enter lie {serial_num_lie} (*) -->')
+            truth = input(f'enter the truth to lie {serial_num_lie} (*) -->')
+
+            # adds the lie and truth the user entered into a dictionary - each key will be different as there will be a number next to the string lie and truth
+            lie_truth_mapping_dict.update({f'lie {serial_num_lie}': lie, f'truth {serial_num_lie}': truth})
+            
 
 
 class MainUI:
