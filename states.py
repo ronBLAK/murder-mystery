@@ -95,6 +95,3 @@ class OppurtunityEvidenceStates(Enum):
 
 class MotiveEvidenceStates(Enum):
     MURDER_MOTIVE = 'suspect motives'
-
-class SpecialEvidenceStates(Enum):
-    LIE = 'lie' # special case for a reason to accuse - cannot be classified under oppurutunity or motive - comes under alibi - will define after i get an idea on how to look at that
